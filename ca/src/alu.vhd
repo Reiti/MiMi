@@ -28,6 +28,12 @@ begin  -- rtl
 	uB <= unsigned(B);
 	calc_result: process(op, sA, sB, uA, uB, A, B)
 	begin
+		V <= '0';
+		if sA = 0 then
+			Z <= '1';
+		else
+			Z <= '0';
+		end if;
 		case op is
 			when ALU_NOP =>
 				R <= A;
@@ -48,15 +54,36 @@ begin  -- rtl
 			when ALU_SLL => 
 				R <= std_logic_vector(shift_left(uB, to_integer(uA)));
 			when ALU_SRL => 
-				R <= std_logic_vector(shift_left(uB, to_integer(uA)));
+				R <= std_logic_vector(shift_right(uB, to_integer(uA)));
 			when ALU_SRA => 
 				R <= to_stdlogicvector(to_bitvector(B) sra to_integer(uA));
-			when ALU_ADD => null;
-			when ALU_SUB => null;
-			when ALU_AND => null;
-			when ALU_OR => null;
-			when ALU_XOR => null;
-			when ALU_NOR => null;
+			when ALU_ADD => 
+				R <= std_logic_vector(sA + sB);
+				if (sA >= 0) and (sB >= 0) and ((sA + sB) < 0) then
+					V <= '1';
+				elsif (sA < 0) and (sB < 0) and ((sA + sB) >= 0) then
+					V <= '1';
+				end if;
+			when ALU_SUB => 
+				R <= std_logic_vector(sA - sB);
+				if sA = sB then
+					Z <= '1';
+				else
+					Z <= '0';
+				end if;
+				if (sA >= 0) and (sB < 0) and ((sA - sB) < 0) then
+					V <= '1';
+				elsif (sA < 0) and (sB >= 0) and ((sA - sB) >= 0) then
+					V <= '1';
+				end if;
+			when ALU_AND => 
+				R <= A and B;
+			when ALU_OR => 
+				R <= A or B;
+			when ALU_XOR => 
+				R <= A xor B;
+			when ALU_NOR => 
+				R <= not(A or B);
 		end case;
 	end process;
 end rtl;
