@@ -10,11 +10,7 @@ end entity;
 
 
 architecture beh of testbench_alu is
-	constant CLK_PERIOD: time := 20 ns;
-
-	signal clk: std_logic;
-	signal rst: std_logic;
-
+  
 	signal A, B, R: std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal Z, V: std_logic;
 	signal op: alu_op_type;
@@ -32,7 +28,7 @@ begin
 			V => V
 		);
 	
-	test: process
+	alu_test: process
 	begin
 		--Standard functionality tests
 		op <= ALU_NOP;
