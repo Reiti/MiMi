@@ -31,6 +31,14 @@ begin
   test_memu: process is
   begin
     --tests for write
+
+    op.memread <= '1';
+    op.memwrite <= '0';
+    op.memtype <= MEM_H;
+    A <="000000000000010000010";
+    W <="00000001001000110100010101100111";
+    D <="01000101011001111000100110101011";
+    wait for 1 sec;
     op.memwrite <= '1';
     W <= x"89ABCDEF";
 
