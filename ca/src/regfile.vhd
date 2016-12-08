@@ -42,12 +42,12 @@ begin  -- rtl
 		end if;
 		if or_reduce(rdaddr1_int) = '0' then
 			rddata1 <= (DATA_WIDTH-1 downto 0 => '0');
-		elsif wraddr_int /= rdaddr1_int then
+		elsif wraddr_int /= rdaddr1_int or regwrite = '0' then
 			rddata1 <= regfile(to_integer(unsigned(rdaddr1_int)));
 		end if;
 		if or_reduce(rdaddr2_int) = '0' then
 			rddata2 <= (DATA_WIDTH-1 downto 0 => '0');
-		elsif wraddr_int /= rdaddr2_int then
+		elsif wraddr_int /= rdaddr2_int or regwrite = '0' then
 			rddata2 <= regfile(to_integer(unsigned(rdaddr2_int)));
 		end if;
 	end process;
