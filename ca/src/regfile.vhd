@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.std_logic_misc.all;
 
 use work.core_pack.all;
 
@@ -29,7 +30,7 @@ begin  -- rtl
   readwrite: process(rdaddr1_int, rdaddr2_int, wraddr_int, wrdata, regwrite) is
 	begin
 		if regwrite = '1' then
-			if wraddr_int /= (REG_BITS -1 downto 0 => '0') then
+			if or_reduce(wraddr_int) /= '0' then
 				if wraddr_int = rdaddr1_int then
 					rddata1 <= wrdata;
 				end if;
@@ -38,17 +39,16 @@ begin  -- rtl
 				end if;
 				regfile(to_integer(unsigned(wraddr_int))) <= wrdata;
 			end if;
-		else
-			if rdaddr1_int = (REG_BITS-1 downto 0 => '0') then
-				rddata1 <= (DATA_WIDTH-1 downto 0 => '0');
-			else
-				rddata1 <= regfile(to_integer(unsigned(rdaddr1_int)));
-			end if;
-			if rdaddr2_int = (REG_BITS-1 downto 0 => '0') then
-				rddata2 <= (DATA_WIDTH-1 downto 0 => '0');
-			else
-				rddata2 <= regfile(to_integer(unsigned(rdaddr2_int)));
-			end if;
+		end if;
+		if or_reduce(rdaddr1_int) = '0' then
+			rddata1 <= (DATA_WIDTH-1 downto 0 => '0');
+		elsif wraddr_int /= rdaddr1_int then
+			rddata1 <= regfile(to_integer(unsigned(rdaddr1_int)));
+		end if;
+		if or_reduce(rdaddr2_int) = '0' then
+			rddata2 <= (DATA_WIDTH-1 downto 0 => '0');
+		elsif wraddr_int /= rdaddr2_int then
+			rddata2 <= regfile(to_integer(unsigned(rdaddr2_int)));
 		end if;
 	end process;
 

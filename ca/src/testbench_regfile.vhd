@@ -74,6 +74,12 @@ begin
     rdaddr1 <= "11111";
     rdaddr2 <= "11110";
     wait until rising_edge(clk);
+    stall <= '1';
+    rdaddr1 <= "00111";
+    rdaddr2 <= "00110";
+    wraddr <= "00111";
+    wait until rising_edge(clk);
+    wait until rising_edge(clk);
   end process;
 
 end architecture beh;
