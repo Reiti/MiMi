@@ -43,6 +43,8 @@ architecture rtl of exec is
 	signal jmpop_out_next : jmp_op_type;
 	signal wbop_out_next  :  wb_op_type;
 	signal exc_ovf_next   : std_logic;
+
+	signal new_pc_next : std_logic_vector(PC_WIDTH-1 downto 0);
 	--latches
 	signal op_l : exec_op_type;
 	signal pc_int: std_logic_vector(PC_WIDTH-1 downto 0);
@@ -51,69 +53,62 @@ architecture rtl of exec is
 	signal wbop_int  : wb_op_type;
 
 	--aluspecific
-	signal input1, input2, alu_out : std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal alu_in1, alu_in2, alu_out : std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal alu_Z, alu_V : std_logic;
+	signal alu_op : ALU_OP_TYPE;
+
 
 begin  -- rtl
 
 	alu_inst : entity work.alu
 	port map(
-		op => op_l.aluop,
-		A => input1,
-		B => input2,
+		op => alu_op,
+		A => alu_in1,
+		B => alu_in2,
 		R => alu_out,
 		Z => alu_Z,
 		V => alu_V
 	);
 
-	exec: process(pc_int, op_l, memop_int, jmpop_int, wbop_int)
+	exec: process(pc_int, op_l, memop_int, jmpop_int, wbop_int, alu_out, alu_Z, alu_V)
 	begin
-		rd_next <= op.rd;
-		rs_next <= op.rs;
-		rt_next <= op.rt;	
-		aluresult_next <= (others => '0');
-		wrdata_next <= (others => '0');
-		zero_next <= '0';
-		neg_next <= '0';
+		rd_next <= op_l.rd;
+		rs_next <= op_l.rs;
+		rt_next <= op_l.rt;	
+		aluresult_next <= alu_out;
+		--wrdata_next <= (others => '0');
+		wrdata_next <= alu_out; -- wrdata ignored, when not needed?
+		zero_next <= alu_Z;
+		neg_next <= alu_out(DATA_WIDTH-1);--alu_V;
 		-- MEM
-		memop_out_next <= MEM_NOP;
+		memop_out_next <= memop_int;
 		-- JUMP
-		jmpop_out_next <= JMP_NOP;
+		jmpop_out_next <= jmpop_int;
 		-- WB
-		wbop_out_next <= WB_NOP;
+		wbop_out_next <= wbop_int;
 		
-		exc_ovf_next <= '0';		
+		exc_ovf_next <= alu_V;	
 
-		case op.aluop is
-		when ALU_NOP =>
-			null;
-		when ALU_SLT =>
-			null;
-		when ALU_SLTU =>
-			null;
-		when ALU_SLL =>
-			null;
-		when ALU_SRL =>
-			null;
-		when ALU_SRA =>
-			null;
-		when ALU_ADD =>
-			null;
-		when ALU_SUB =>
-			null;
-		when ALU_AND =>
-			null;
-		when ALU_OR =>
-			null;
-		when ALU_XOR =>
-			null;
-		when ALU_NOR =>
-			null;
-		when ALU_LUI => 
-			null;
-		when others =>
-			null;
-		end case;
+		--std alu operands
+		alu_op <= op_l.aluop;
+		
+		alu_in1 <= op_l.readdata1;
+		alu_in2 <= op_l.readdata2;	
+
+		new_pc_next <= pc_int;	
+
+		if(op_l.useimm = '1' or op_l.useamt = '1') then
+			alu_in2 <= op_l.imm;
+		end if;
+		
+		if (op_l.link = '1')	then
+			--new_pc_next <= op_l.imm;
+			wrdata_next <= std_logic_vector(shift_left(unsigned(op_l.imm), 2));
+		end if;
+		if(op_l.branch = '1') then
+			new_pc_next <= std_logic_vector(unsigned(pc_int) + unsigned(shift_left(unsigned(op_l.imm), 2)));	
+		end if;	
+			
 	end process;
 
 --write new values:
@@ -129,6 +124,8 @@ begin  -- rtl
 	jmpop_out <= jmpop_out_next;
 	wbop_out <= wbop_out_next;
 	exc_ovf <= exc_ovf_next;
+	
+	new_pc <= new_pc_next;
 
 	sync:process(clk, reset, stall, flush)
 	begin
