@@ -86,19 +86,20 @@ begin
 
 	exec_test: process
 	begin
-		wait until falling_edge(reset);
+		wait until rising_edge(reset);
 		wait for 2*CLK_PERIOD;	
-		op.aluop <= ALU_ADD;
-		op.readdata1 <= x"00000001";
-		op.readdata2 <= x"00000002";
-		op.imm <= x"00000000";
+		pc_in <= std_logic_vector(to_unsigned(8, pc_in'length));
+		op.aluop <= ALU_SUB;
+		op.readdata1 <= x"00000101";
+		op.readdata2 <= x"00000000";
+		op.imm <= x"00000002";
 		op.rs <="00000";
 		op.rt <="00001";
 		op.rd <="00010";
 		op.useimm <= '0';
 		op.useamt <= '0';
-		op.link <= '0';
-		op.branch <= '0';
+		op.link <= '1';
+		op.branch <= '1';
 		op.regdst <= '0';
 		op.cop0 <= '0';
 		op.ovf <= '0';	

@@ -103,10 +103,11 @@ begin  -- rtl
 		
 		if (op_l.link = '1')	then
 			--new_pc_next <= op_l.imm;
-			wrdata_next <= std_logic_vector(unsigned(op_l.imm) + 4);
+			wrdata_next <= std_logic_vector(resize(unsigned(pc_int) + 4 , wrdata_next'length));
 		end if;
 		if(op_l.branch = '1') then
-			new_pc_next <= std_logic_vector(unsigned(pc_int) + unsigned(shift_left(unsigned(op_l.imm), 2)));	
+			new_pc_next <= std_logic_vector(unsigned(pc_int) + 
+											unsigned(shift_left(unsigned(op_l.imm(13 downto 0)), 2)));	
 		end if;	
 			
 	end process;
