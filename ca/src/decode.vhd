@@ -98,7 +98,7 @@ begin  -- rtl
 				wb_op_next.regwrite <= '1';
 				case instr_int(5 downto 0) is -- function
 				when "000000" =>
-					if(instr_int(10 downto 0) /= "00000") then
+					if(instr_int(10 downto 6) /= "00000") then
 						exec_op_next.aluop <= ALU_SLL;
 						exec_op_next.useamt <= '1';
 					else
