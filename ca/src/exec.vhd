@@ -35,7 +35,50 @@ entity exec is
 end exec;
 
 architecture rtl of exec is
+	signal pc_int, pc_int_next, pc_out_next : std_logic_vector(PC_WIDTH-1 downto 0);
+	signal rd_next, rs_next, rt_next : std_logic_vector(REG_BITS-1 downto 0);
+	signal aluresult_next : std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal wrdata_next : std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal zero_next, neg_next : std_logic;
+	signal memop_out_next : mem_op_type;
+	signal jmpop_out_next : jmp_op_type;
+	signal wbop_out_next  :  wb_op_type;
+	signal exc_ovf_next   : std_logic;
 
 begin  -- rtl
 
+	exec: process(pc_in, op, memop_in, jmpop_in, wbop_in)
+	begin
+	
+		case op.aluop is
+		when others =>
+			null;
+		end case;
+	end process;
+
+
+	sync:process(clk, reset, stall, flush)
+	begin
+		if reset = '0' then
+			null;
+		elsif flush = '0' then
+			null;	
+		elsif rising_edge(clk) and not stall = '1' then
+			--op is a faggot
+			
+	
+			pc_out <= pc_out_next;
+			rd <= rd_next;
+			rs <= rs_next;
+			rt <= rt_next;
+			aluresult <= aluresult_next;
+			wrdata <= wrdata_next;
+			zero <= zero_next;
+			neg <= neg_next;
+			memop_out <= memop_out_next;
+			jmpop_out <= jmpop_out_next;
+			wbop_out <= wbop_out_next;
+			exc_ovf <= exc_ovf_next;
+		end if;
+	end process;
 end rtl;
