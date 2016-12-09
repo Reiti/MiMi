@@ -44,6 +44,15 @@ architecture rtl of decode is
 	signal rdaddr1, rdaddr2 : std_logic_vector(REG_BITS-1 downto 0);
 	signal rddata1, rddata2 : std_logic_vector(DATA_WIDTH-1 downto 0);
 
+	function sign_ext(signal x:in std_logic_vector; constant i, N:integer)
+		return std_logic_vector is
+	begin
+		if N > i then
+			return (N-i-1 downto 0 => x(i-1)) & x(i-1 downto 0);
+		else
+			return x(i-1 downto 0);
+		end if;
+	end function;
 
 begin  -- rtl
 
@@ -104,13 +113,19 @@ begin  -- rtl
 				when "000111" =>
 					exec_op_next.aluop <= ALU_SRA;
 				when "001000" =>
+					exec_op_next.aluop <= ALU_ADD;
+					exec_op_next.rd <= "11111";
+					exec_op_next.rt <= (others => '0');
+					jmp_op_next <= JMP_JMP;
 					wb_op_next.regwrite <= '0';
-					-- TODO: irgendwas fehlt
 					-- pc = rs
 				when "001001" =>
+					exec_op_next.aluop <= ALU_ADD;
+					exec_op_next.rd <= "11111";
+					exec_op_next.rt <= (others => '0');
 					exec_op_next.link <= '1';
+					jmp_op_next <= JMP_JMP;
 					-- rd = pc+4 ; pc = rs
-					-- TODO: nochmal nachdenken
 				when "100000" =>
 					exec_op_next.aluop <= ALU_ADD;
 				when "100001" =>
@@ -151,51 +166,58 @@ begin  -- rtl
 
 		-- regimm instructions
 		when "000001" =>
+			if rd(4) = '1' then
+				exec_op_next.link <= '1';
+			end if;
+			exec_op_next.aluop <= ALU_SUB;
+			exec_op_next.rt <= (others => '0');
+			exec_op_next.branch <= '1';
 			case rd is
 			when "00000" | "10000" =>
-				if rd(5) = '1' then
-					exec_op_next.link <= '1';
-				end if;
-				exec_op_next.branch <= '1';
 				jmp_op_next <= JMP_BLTZ;
 			when "00001" | "10001" =>
-				if rd(5) = '1' then
-					exec_op_next.link <= '1';
-				end if;
-				exec_op_next.branch <= '1';
 				jmp_op_next <= JMP_BGEZ;
 			when others =>
 				exc_dec <= '1';
 			end case;
 		-- Branch Instruction
 		when "000100" =>
+			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			exec_op_next.imm <= std_logic_vector(signed(instr_int(15 downto 0)));
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BEQ;
 		when "000101" =>
+			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			exec_op_next.imm <= std_logic_vector(signed(instr_int(15 downto 0)));
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BNE;
 		when "000110" =>
+			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			exec_op_next.imm <= std_logic_vector(signed(instr_int(15 downto 0)));
+			exec_op_next.rt <= (others => '0');
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BLEZ;
 		when "000111" =>
+			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			exec_op_next.imm <= std_logic_vector(signed(instr_int(15 downto 0)));
+			exec_op_next.rt <= (others => '0');
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BGTZ;
 
 		-- Extra ALU Instructions
 		when "001000" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001001" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001010" =>
 			exec_op_next.aluop <= ALU_SLT;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001011" =>
@@ -220,6 +242,7 @@ begin  -- rtl
 			wb_op_next.regwrite <= '1';
 		when "100000" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memread <= '1';
 			mem_op_next.memtype <= MEM_B;
@@ -227,6 +250,7 @@ begin  -- rtl
 			wb_op_next.memtoreg <= '1';
 		when "100001" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memread <= '1';
 			mem_op_next.memtype <= MEM_H;
@@ -234,6 +258,7 @@ begin  -- rtl
 			wb_op_next.memtoreg <= '1';
 		when "100011" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memread <= '1';
 			mem_op_next.memtype <= MEM_W;
@@ -241,6 +266,7 @@ begin  -- rtl
 			wb_op_next.memtoreg <= '1';
 		when "100100" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memread <= '1';
 			mem_op_next.memtype <= MEM_BU;
@@ -248,6 +274,7 @@ begin  -- rtl
 			wb_op_next.memtoreg <= '1';
 		when "100101" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memread <= '1';
 			mem_op_next.memtype <= MEM_HU;
@@ -255,16 +282,19 @@ begin  -- rtl
 			wb_op_next.memtoreg <= '1';
 		when "101000" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_B;
 		when "101001" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_H;
 		when "101011" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_W;
