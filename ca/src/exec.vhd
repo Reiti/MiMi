@@ -35,7 +35,6 @@ entity exec is
 end exec;
 
 architecture rtl of exec is
-	signal pc_int, pc_int_next, pc_out_next : std_logic_vector(PC_WIDTH-1 downto 0);
 	signal rd_next, rs_next, rt_next : std_logic_vector(REG_BITS-1 downto 0);
 	signal aluresult_next : std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal wrdata_next : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -44,18 +43,92 @@ architecture rtl of exec is
 	signal jmpop_out_next : jmp_op_type;
 	signal wbop_out_next  :  wb_op_type;
 	signal exc_ovf_next   : std_logic;
+	--latches
+	signal op_l : exec_op_type;
+	signal pc_int: std_logic_vector(PC_WIDTH-1 downto 0);
+	signal memop_int : mem_op_type;
+	signal jmpop_int : jmp_op_type;
+	signal wbop_int  : wb_op_type;
+
+	--aluspecific
+	signal input1, input2, alu_out : std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal alu_Z, alu_V : std_logic;
 
 begin  -- rtl
 
-	exec: process(pc_in, op, memop_in, jmpop_in, wbop_in)
+	alu_inst : entity work.alu
+	port map(
+		op => op_l.aluop,
+		A => input1,
+		B => input2,
+		R => alu_out,
+		Z => alu_Z,
+		V => alu_V
+	);
+
+	exec: process(pc_int, op_l, memop_int, jmpop_int, wbop_int)
 	begin
-	
+		rd_next <= op.rd;
+		rs_next <= op.rs;
+		rt_next <= op.rt;	
+		aluresult_next <= (others => '0');
+		wrdata_next <= (others => '0');
+		zero_next <= '0';
+		neg_next <= '0';
+		-- MEM
+		memop_out_next <= MEM_NOP;
+		-- JUMP
+		jmpop_out_next <= JMP_NOP;
+		-- WB
+		wbop_out_next <= WB_NOP;
+		
+		exc_ovf_next <= '0';		
+
 		case op.aluop is
+		when ALU_NOP =>
+			null;
+		when ALU_SLT =>
+			null;
+		when ALU_SLTU =>
+			null;
+		when ALU_SLL =>
+			null;
+		when ALU_SRL =>
+			null;
+		when ALU_SRA =>
+			null;
+		when ALU_ADD =>
+			null;
+		when ALU_SUB =>
+			null;
+		when ALU_AND =>
+			null;
+		when ALU_OR =>
+			null;
+		when ALU_XOR =>
+			null;
+		when ALU_NOR =>
+			null;
+		when ALU_LUI => 
+			null;
 		when others =>
 			null;
 		end case;
 	end process;
 
+--write new values:
+	pc_out <= pc_int;
+	rd <= rd_next;
+	rs <= rs_next;
+	rt <= rt_next;
+	aluresult <= aluresult_next;
+	wrdata <= wrdata_next;
+	zero <= zero_next;
+	neg <= neg_next;
+	memop_out <= memop_out_next;
+	jmpop_out <= jmpop_out_next;
+	wbop_out <= wbop_out_next;
+	exc_ovf <= exc_ovf_next;
 
 	sync:process(clk, reset, stall, flush)
 	begin
@@ -64,21 +137,14 @@ begin  -- rtl
 		elsif flush = '0' then
 			null;	
 		elsif rising_edge(clk) and not stall = '1' then
-			--op is a faggot
-			
-	
-			pc_out <= pc_out_next;
-			rd <= rd_next;
-			rs <= rs_next;
-			rt <= rt_next;
-			aluresult <= aluresult_next;
-			wrdata <= wrdata_next;
-			zero <= zero_next;
-			neg <= neg_next;
-			memop_out <= memop_out_next;
-			jmpop_out <= jmpop_out_next;
-			wbop_out <= wbop_out_next;
-			exc_ovf <= exc_ovf_next;
+			--latch new values
+			op_l<=op;
+			pc_int <= pc_in;
+			memop_int <= memop_in;
+			jmpop_int <= jmpop_in;
+			wbop_int <= wbop_in;
+
+	 	
 		end if;
 	end process;
 end rtl;
