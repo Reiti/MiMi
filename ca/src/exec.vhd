@@ -103,7 +103,7 @@ begin  -- rtl
 		
 		if (op_l.link = '1')	then
 			--new_pc_next <= op_l.imm;
-			wrdata_next <= std_logic_vector(shift_left(unsigned(op_l.imm), 2));
+			wrdata_next <= std_logic_vector(unsigned(op_l.imm) + 4);
 		end if;
 		if(op_l.branch = '1') then
 			new_pc_next <= std_logic_vector(unsigned(pc_int) + unsigned(shift_left(unsigned(op_l.imm), 2)));	
@@ -127,11 +127,11 @@ begin  -- rtl
 	
 	new_pc <= new_pc_next;
 
-	sync:process(clk, reset, stall, flush)
+	sync:process(clk, reset, stall, flush, op, pc_in, memop_in, jmpop_in, wbop_in)
 	begin
 		if reset = '0' then
 			null;
-		elsif flush = '0' then
+		elsif flush = '1' then
 			null;	
 		elsif rising_edge(clk) and not stall = '1' then
 			--latch new values
