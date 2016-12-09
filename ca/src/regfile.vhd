@@ -23,7 +23,7 @@ architecture rtl of regfile is
 
 	signal rdaddr1_int, rdaddr2_int: std_logic_vector(REG_BITS-1 downto 0);
 	signal wraddr_int: std_logic_vector(REG_BITS-1 downto 0) := (others => '0');
-	signal regfile: regfile_type;
+	signal regfile: regfile_type := (others => (others => '0'));
 
 begin  -- rtl
 
