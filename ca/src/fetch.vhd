@@ -17,8 +17,10 @@ entity fetch is
 end fetch;
 
 architecture rtl of fetch is
+	constant testbench_fetch_stall : integer := 0;
 	signal imem_addr: std_logic_vector(11 downto 0);
 	signal pc_int: std_logic_vector(PC_WIDTH-1 downto 0);
+	signal clk_cnt, clk_cnt_next : integer;
 begin  -- rtl
 
 	isnt_mem: entity work.imem_altera
@@ -31,15 +33,28 @@ begin  -- rtl
 
 	imem_addr <= pc_int(PC_WIDTH-1 downto 2);
 	pc_out <= pc_int;
-	compute_addr: process(clk, reset, pcsrc, pc_in) is
+
+	cl_count : process(clk_cnt) is
+	begin
+		clk_cnt_next <= clk_cnt +1;
+	end process;
+
+
+	compute_addr: process(clk, reset, pcsrc, pc_in, clk_cnt_next) is
 	begin
 		if reset = '0' then
 			pc_int <= (others => '0');
+			clk_cnt <= 0;
 		elsif rising_edge(clk) and (not(stall = '1')) then
-			if pcsrc = '1' then
-				pc_int <= pc_in;
+			if clk_cnt <  testbench_fetch_stall then
+				clk_cnt <= clk_cnt_next;
 			else
-				pc_int <= std_logic_vector(unsigned(pc_int) + to_unsigned(4, pc_int'length));
+				clk_cnt <= 0;
+				if pcsrc = '1' then
+					pc_int <= pc_in;
+				else
+					pc_int <= std_logic_vector(unsigned(pc_int) + to_unsigned(4, pc_int'length));
+				end if;
 			end if;
 		end if; 
 	end process;

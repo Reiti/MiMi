@@ -77,7 +77,7 @@ begin  -- rtl
 		rt_next <= op_l.rt;	
 		aluresult_next <= alu_out;
 		--wrdata_next <= (others => '0');
-		wrdata_next <= alu_out; -- wrdata ignored, when not needed?
+		wrdata_next <= alu_out; -- wrdata ignored, when not needed
 		zero_next <= alu_Z;
 		neg_next <= alu_out(DATA_WIDTH-1);--alu_V;
 		-- MEM
@@ -94,8 +94,9 @@ begin  -- rtl
 		
 		alu_in1 <= op_l.readdata1;
 		alu_in2 <= op_l.readdata2;	
-
-		new_pc_next <= pc_int;	
+		
+		-- if needed, jump will jump there, or else its ignored anyway
+		new_pc_next <= std_logic_vector(unsigned(shift_left(unsigned(alu_out(13 downto 0)),2)));	
 
 		if(op_l.useimm = '1' or op_l.useamt = '1') then
 			alu_in2 <= op_l.imm;

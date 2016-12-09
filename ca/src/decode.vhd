@@ -98,8 +98,12 @@ begin  -- rtl
 				wb_op_next.regwrite <= '1';
 				case instr_int(5 downto 0) is -- function
 				when "000000" =>
-					exec_op_next.aluop <= ALU_SLL;
-					exec_op_next.useamt <= '1';
+					if(instr_int(10 downto 0) /= "00000") then
+						exec_op_next.aluop <= ALU_SLL;
+						exec_op_next.useamt <= '1';
+					else
+						exec_op_next <= EXEC_NOP;
+					end if;
 				when "000010" =>
 					exec_op_next.aluop <= ALU_SRL;
 					exec_op_next.useamt <= '1';
@@ -155,6 +159,10 @@ begin  -- rtl
 		when "000010" | "000011" => -- J-type instruction
 			
 			exec_op_next.imm(26 downto 0) <= instr_int(26 downto 0);
+			jmp_op_next <= JMP_JMP;
+			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.readdata1 <= x"00000000";
+			exec_op_next.useimm <= '1';
 			if opcode(0) = '1' then
 				exec_op_next.rd <= "11111";
 				exec_op_next.link <= '1';
@@ -310,7 +318,7 @@ begin  -- rtl
 	jmp_op <= jmp_op_next;
 	mem_op <= mem_op_next;
 	wb_op <= wb_op_next;
-	sync:process(clk, reset, stall, flush)
+	sync:process(clk, reset, stall, flush, instr, pc_in, wrdata, wraddr, regwrite)
 	begin
 		if reset = '0' then
 			null;

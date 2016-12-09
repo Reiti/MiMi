@@ -144,7 +144,7 @@ begin  -- rtl
 	mem_inst: entity work.mem
 	port map(
 		clk => clk,
-		reset => mem_in.busy,
+		reset => reset,
 		stall => mem_in.busy,
 		flush => '0',
 

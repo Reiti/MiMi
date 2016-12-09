@@ -94,7 +94,7 @@ BEGIN
 		byte_size => 8,
 		clock_enable_input_a => "BYPASS",
 		clock_enable_output_a => "BYPASS",
-		init_file => "../src/dmem.mif",
+		init_file => "dmem.mif",
 		intended_device_family => "Cyclone II",
 		lpm_hint => "ENABLE_RUNTIME_MOD=NO",
 		lpm_type => "altsyncram",
