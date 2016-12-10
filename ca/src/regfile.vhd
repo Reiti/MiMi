@@ -23,35 +23,36 @@ architecture rtl of regfile is
 
 	signal rdaddr1_int, rdaddr2_int: std_logic_vector(REG_BITS-1 downto 0);
 	signal wraddr_int: std_logic_vector(REG_BITS-1 downto 0) := (others => '0');
-	signal regfile: regfile_type := (others => (others => '0'));
+	signal wrdata_int : std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal regfile, regfile_next: regfile_type := (others => (others => '0'));
 
 begin  -- rtl
 
-  readwrite: process(rdaddr1_int, rdaddr2_int, wraddr_int, wrdata, regwrite) is
+  readwrite: process(rdaddr1_int, rdaddr2_int, wraddr_int, wrdata_int, regwrite, regfile) is
 	begin
-		if regwrite = '1' then
+		if regwrite = '1' and not stall = '1' then
 			if or_reduce(wraddr_int) /= '0' then
 				if wraddr_int = rdaddr1_int then
-					rddata1 <= wrdata;
+					rddata1 <= wrdata_int;
 				end if;
 				if wraddr_int = rdaddr2_int then
-					rddata2 <= wrdata;
+					rddata2 <= wrdata_int;
 				end if;
-				regfile(to_integer(unsigned(wraddr_int))) <= wrdata;
+				regfile_next(to_integer(unsigned(wraddr_int))) <= wrdata_int;
 			end if;
 		end if;
 		if or_reduce(rdaddr1_int) = '0' then
 			rddata1 <= (DATA_WIDTH-1 downto 0 => '0');
-		elsif wraddr_int /= rdaddr1_int or regwrite = '0' then
+		else--if wraddr_int /= rdaddr1_int or regwrite = '0' then
 			rddata1 <= regfile(to_integer(unsigned(rdaddr1_int)));
 		end if;
 		if or_reduce(rdaddr2_int) = '0' then
 			rddata2 <= (DATA_WIDTH-1 downto 0 => '0');
-		elsif wraddr_int /= rdaddr2_int or regwrite = '0' then
+		else--if wraddr_int /= rdaddr2_int or regwrite = '0' then
 			rddata2 <= regfile(to_integer(unsigned(rdaddr2_int)));
 		end if;
 	end process;
-
+	
 	latch: process(clk, reset) is
 	begin
 		if reset = '0' then
@@ -62,6 +63,9 @@ begin  -- rtl
 			rdaddr1_int <= rdaddr1;
 			rdaddr2_int <= rdaddr2;
 			wraddr_int <= wraddr;
+			wrdata_int <= wrdata;
+
+			regfile <= regfile_next;
 		end if;
 	end process;
 end rtl;
