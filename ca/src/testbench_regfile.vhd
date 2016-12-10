@@ -48,38 +48,63 @@ begin
 
   regfile_test: process is
   begin
-    --test write
-    wait until rising_edge(reset);
-    wraddr <= "11111";
-    wait until rising_edge(clk);
-    wrdata <= x"aaaaaaaa";
-    regwrite <= '1';
-    wait until rising_edge(clk);
-    wraddr <= "11110";
-    wait until rising_edge(clk);
-    wrdata <= x"aaaaaaaa";
-    wait until rising_edge(clk);
+	wait until rising_edge(reset);
+--prep for failes stall tests:
+	stall <= '0';
+	rdaddr1 <= "00001"; rdaddr2<="00000";
+	wraddr <= "00001";
+	wrdata <=x"AA55AA55";
+	regwrite <= '1';
+wait for 3*CLK_PERIOD;
+  --reproducing failed test
+	stall <= '1';
+	rdaddr1 <= "00000"; rdaddr2<="00000";
+	wraddr <= "10101";
+	wrdata <=x"55AA55AA";
+	regwrite <= '1';
+	--expecting: rd1: AA55AA55 rd2: 0
+	wait for 2*CLK_PERIOD;
+	stall <= '1';
+	rdaddr1 <= "00000"; rdaddr2<="00000";
+	wraddr <= "00000";
+	wrdata <=x"12345678";
+	regwrite <= '1';
+	--expecting: rd1: AA55AA55 rd2: 0
+wait for 5*CLK_PERIOD;
 
-    --test simultaneous read and write
-    rdaddr1 <= "11111";
-    wraddr <= "11111";
-    wait until rising_edge(clk);
-    wrdata <= x"0000aaaa";
-    regwrite <= '1';
-    wait until rising_edge(clk);
-    regwrite <= '0';
-    wait until rising_edge(clk);
+--prep for failed sym. r/w tests
+	stall <= '0';
+	rdaddr1 <= "00000"; rdaddr2<="00000";
+	wraddr <= "11100";
+	wrdata <=x"00000000";
+	regwrite <= '1';
+wait for 1*CLK_PERIOD;
+	stall <= '0';
+	rdaddr1 <= "00000"; rdaddr2<="00000";
+	wraddr <= "11101";
+	wrdata <=x"00000000";
+	regwrite <= '1';
 
-    --test read i guess
-    rdaddr1 <= "11111";
-    rdaddr2 <= "11110";
-    wait until rising_edge(clk);
-    stall <= '1';
-    rdaddr1 <= "00111";
-    rdaddr2 <= "00110";
-    wraddr <= "00111";
-    wait until rising_edge(clk);
-    wait until rising_edge(clk);
+
+wait for 3*CLK_PERIOD;
+	stall <= '0';
+	rdaddr1<= "11100"; rdaddr2 <= "00000";
+	wraddr <= "11100";
+	wrdata <= x"89ABCDEF";
+	regwrite <= '1';
+	--expecting: rd1:89ABCDEF rd2:0
+	wait for 1*CLK_PERIOD;
+	wrdata <= x"00000000";
+	wait for 4*CLK_PERIOD;
+	stall <= '0';
+	rdaddr1<= "00000"; rdaddr2 <= "11101";
+	wraddr <= "11101";
+	wrdata <= x"76543210";
+	regwrite <= '1';
+	wait for 1*CLK_PERIOD;
+	wrdata <= x"00000000";
+	--expecting: rd1:0 rd2:76543210
+	wait; 
   end process;
 
 end architecture beh;
