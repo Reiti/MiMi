@@ -56,9 +56,13 @@ architecture rtl of decode is
 
 begin  -- rtl
 
+--refile latcht 
 	rdaddr1 <= instr(25 downto 21);
 	rdaddr2 <= instr(20 downto 16);
 
+	wrdata_int <= wrdata;
+	wraddr_int <= wraddr;
+	regwrite_int <= regwrite;
 
 
 
@@ -73,16 +77,16 @@ begin  -- rtl
 	begin
 		opcode := instr_int(31 downto 26);
 		rs := instr_int(25 downto 21);
-		rt := instr_int(20 downto 16);
-		rd := instr_int(15 downto 11);
+		rd := instr_int(20 downto 16);
+		--rd := instr_int(15 downto 11);
 
 		exc_dec <= '0';
 
 		-- EXEC
 		exec_op_next <= EXEC_NOP;
-		exec_op_next.rs <= rs;
-		exec_op_next.rt <= rt;
-		exec_op_next.rd <= rd;
+
+		--rs,rt,rd assignment at the end of processs
+
 		exec_op_next.imm(15 downto 0) <= instr_int(15 downto 0);
 		exec_op_next.imm(31 downto 16) <= (others => '0');
 		exec_op_next.readdata1 <= rddata1;
@@ -101,6 +105,8 @@ begin  -- rtl
 
 		case opcode is
 		when "000000" | "010000" => -- R-type instruction
+			rt := instr_int(20 downto 16);
+			rd := instr_int(15 downto 11);
 			if or_reduce(opcode) = '0' then
 				-- ALU instruction
 				wb_op_next.regwrite <= '1';
@@ -319,6 +325,11 @@ begin  -- rtl
 		when others =>
 			exc_dec <= '1';
 		end case;
+
+		exec_op_next.rs <= rs;
+		exec_op_next.rt <= rt;
+		exec_op_next.rd <= rd;
+
 	end process;
 
 	-- write decoded info
@@ -328,24 +339,21 @@ begin  -- rtl
 	jmp_op <= jmp_op_next;
 	mem_op <= mem_op_next;
 	wb_op <= wb_op_next;
-	sync:process(clk, reset, stall, flush, instr, pc_in, wrdata, wraddr, regwrite)
+	sync:process(clk, reset, stall, flush, instr, pc_in)
 	begin
 		if reset = '0' then
 			null;
 		elsif flush = '1' then
 			instr_int <= (others => '0');
 			pc_int <= (others => '0');
-			wraddr_int <= (others => '0');
-			wrdata_int <= (others => '0');
-			regwrite_int <= '0';
+			--wraddr_int <= (others => '0');
+			--wrdata_int <= (others => '0');
+			--regwrite_int <= '0';
 		elsif rising_edge(clk) and not stall = '1' then
 			
 			-- latch new values
 			instr_int <= instr;
 			pc_int <= pc_in;
-			wrdata_int <= wrdata;
-			wraddr_int <= wraddr;
-			regwrite_int <= regwrite;
 
 		end if;
 	end process;
