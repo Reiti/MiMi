@@ -81,6 +81,8 @@ begin  -- rtl
 		exec_op_next.imm(31 downto 16) <= (others => '0');
 		exec_op_next.readdata1 <= rddata1;
 		exec_op_next.readdata2 <= rddata2;
+		
+		wb_op_next.regwrite <= '0';		
 
 		-- MEM
 		mem_op_next <= MEM_NOP;
@@ -103,6 +105,7 @@ begin  -- rtl
 						exec_op_next.useamt <= '1';
 					else
 						exec_op_next <= EXEC_NOP;
+						wb_op_next.regwrite <= '0';
 					end if;
 				when "000010" =>
 					exec_op_next.aluop <= ALU_SRL;
@@ -129,6 +132,7 @@ begin  -- rtl
 					exec_op_next.rt <= (others => '0');
 					exec_op_next.link <= '1';
 					jmp_op_next <= JMP_JMP;
+					wb_op_next.regwrite <= '0';
 					-- rd = pc+4 ; pc = rs
 				when "100000" =>
 					exec_op_next.aluop <= ALU_ADD;
