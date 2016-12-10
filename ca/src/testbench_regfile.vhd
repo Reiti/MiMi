@@ -82,7 +82,7 @@ wait for 1*CLK_PERIOD;
 	stall <= '0';
 	rdaddr1 <= "00000"; rdaddr2<="00000";
 	wraddr <= "11101";
-	wrdata <=x"00000000";
+	wrdata <=x"FEDCBA98";
 	regwrite <= '1';
 
 
@@ -93,8 +93,8 @@ wait for 3*CLK_PERIOD;
 	wrdata <= x"89ABCDEF";
 	regwrite <= '1';
 	--expecting: rd1:89ABCDEF rd2:0
-	wait for 1*CLK_PERIOD;
-	wrdata <= x"00000000";
+	--wait for 1*CLK_PERIOD;
+	--wrdata <= x"00000000";
 	wait for 4*CLK_PERIOD;
 	stall <= '0';
 	rdaddr1<= "00000"; rdaddr2 <= "11101";
@@ -102,7 +102,7 @@ wait for 3*CLK_PERIOD;
 	wrdata <= x"76543210";
 	regwrite <= '1';
 	wait for 1*CLK_PERIOD;
-	wrdata <= x"00000000";
+	--wrdata <= x"00000000";
 	--expecting: rd1:0 rd2:76543210
 	wait; 
   end process;

@@ -56,6 +56,12 @@ architecture rtl of decode is
 
 begin  -- rtl
 
+	rdaddr1 <= instr(25 downto 21);
+	rdaddr2 <= instr(20 downto 16);
+
+
+
+
 	registers:entity work.regfile
 	port map(clk => clk, reset => reset, stall => stall, rdaddr1 => rdaddr1,
 		rdaddr2 => rdaddr2, rddata1 => rddata1, rddata2 => rddata2,
@@ -340,9 +346,6 @@ begin  -- rtl
 			wrdata_int <= wrdata;
 			wraddr_int <= wraddr;
 			regwrite_int <= regwrite;
-
-			rdaddr1 <= instr(25 downto 21);
-			rdaddr2 <= instr(20 downto 16);
 
 		end if;
 	end process;
