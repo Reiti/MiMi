@@ -77,6 +77,7 @@ begin  -- rtl
 	begin
 		opcode := instr_int(31 downto 26);
 		rs := instr_int(25 downto 21);
+		rt := (others => '0');
 		rd := instr_int(20 downto 16);
 		--rd := instr_int(15 downto 11);
 
@@ -194,7 +195,10 @@ begin  -- rtl
 				exec_op_next.link <= '1';
 			end if;
 			exec_op_next.aluop <= ALU_SUB;
-			exec_op_next.rt <= (others => '0');
+			rt := rs;
+			rs := (others => '0');
+			exec_op_next.readdata1 <= rddata2;
+			exec_op_next.readdata2 <= rddata1;
 			exec_op_next.branch <= '1';
 			case rd is
 			when "00000" | "10000" =>

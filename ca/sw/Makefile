@@ -12,8 +12,8 @@ CFLAGS=-O2 -DARCH_IS_BIG_ENDIAN=1
 all: lib conf
 
 conf: ${PROJECT}.imem.mif ${PROJECT}.dmem.mif
-	cp ${PROJECT}.imem.mif ../src/imem.mif
-	cp ${PROJECT}.dmem.mif ../src/dmem.mif
+	cp ${PROJECT}.imem.mif ../../imem.mif
+	cp ${PROJECT}.dmem.mif ../../dmem.mif
 
 helloworld.elf: helloworld.o
 	${LD} -o $@ crt0.o $^ -L. -lc
