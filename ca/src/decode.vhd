@@ -353,7 +353,8 @@ begin  -- rtl
 			
 			-- latch new values
 			instr_int <= instr;
-			pc_int <= pc_in;
+			pc_int <=	--signal regwrite : std_logic;
+ pc_in;
 
 		end if;
 	end process;
