@@ -96,20 +96,24 @@ begin  -- rtl
 		alu_in2 <= op_l.readdata2;	
 		
 		-- if needed, jump will jump there, or else its ignored anyway
-		new_pc_next <= std_logic_vector(unsigned(shift_left(unsigned(alu_out(13 downto 0)),2)));	
-
-		if(op_l.useimm = '1' or op_l.useamt = '1') then
+		new_pc_next <= alu_out(13 downto 0);--std_logic_vector(unsigned(shift_left(unsigned(alu_out(13 downto 0)),2)));	
+		if(op_l.useimm = '1') then
 			alu_in2 <= op_l.imm;
 		end if;
-		
-		if (op_l.link = '1')	then
-			--new_pc_next <= op_l.imm;
-			wrdata_next <= std_logic_vector(resize(unsigned(pc_int) + 4 , wrdata_next'length));
+
+		if(op_l.useamt ='1' or op_l.aluop = ALU_LUI) then --shift ops have A/B swapped 
+			alu_in2 <= op_l.readdata1;
+			alu_in1 <= op_l.imm;
 		end if;
-		if(op_l.branch = '1') then
-			new_pc_next <= std_logic_vector(unsigned(pc_int) + 
-											unsigned(shift_left(unsigned(op_l.imm(13 downto 0)), 2)));	
+		
+		if op_l.link = '1' then --link! regwrite is active-> pc shoudl go to r31/ jalr rd
+			aluresult_next <= std_logic_vector(resize(unsigned(pc_int) , aluresult_next'length));
+			--new_pc_next <= std_logic_vector(unsigned(shift_left(unsigned(op_l.imm(13 downto 0)), 2)));
 		end if;	
+		if (op_l.branch = '1')	then
+			new_pc_next <= std_logic_vector(unsigned(pc_int) + 
+											unsigned(shift_left(unsigned(op_l.imm(13 downto 0)), 2)));
+		end if;
 			
 	end process;
 

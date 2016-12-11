@@ -132,20 +132,20 @@ begin  -- rtl
 					exec_op_next.aluop <= ALU_SRL;
 				when "000111" =>
 					exec_op_next.aluop <= ALU_SRA;
-				when "001000" =>
+				when "001000" => --JR
 					exec_op_next.aluop <= ALU_ADD;
 					exec_op_next.rd <= "11111";
 					exec_op_next.rt <= (others => '0');
 					jmp_op_next <= JMP_JMP;
 					wb_op_next.regwrite <= '0';
 					-- pc = rs
-				when "001001" =>
+				when "001001" =>--JALR
 					exec_op_next.aluop <= ALU_ADD;
-					exec_op_next.rd <= "11111";
+					--exec_op_next.rd <= "11111"; not r31, chris >:D
 					exec_op_next.rt <= (others => '0');
 					exec_op_next.link <= '1';
 					jmp_op_next <= JMP_JMP;
-					wb_op_next.regwrite <= '0';
+					wb_op_next.regwrite <= '1';
 					-- rd = pc+4 ; pc = rs
 				when "100000" =>
 					exec_op_next.aluop <= ALU_ADD;
@@ -175,13 +175,15 @@ begin  -- rtl
 
 		when "000010" | "000011" => -- J-type instruction
 			
-			exec_op_next.imm(26 downto 0) <= instr_int(26 downto 0);
 			jmp_op_next <= JMP_JMP;
-			exec_op_next.aluop <= ALU_ADD;
-			exec_op_next.readdata1 <= x"00000000";
-			exec_op_next.useimm <= '1';
+			exec_op_next.aluop <= ALU_SLL;
+			exec_op_next.readdata1 <= std_logic_vector(resize(unsigned(instr_int(25 downto 0)), 
+																	exec_op_next.readdata1'length));
+			exec_op_next.imm(25 downto 0) <= std_logic_vector(to_unsigned( 2, 
+																		exec_op_next.imm(25 downto 0)'length));
+			exec_op_next.useamt <= '1';
 			if opcode(0) = '1' then
-				exec_op_next.rd <= "11111";
+				rd := "11111";
 				exec_op_next.link <= '1';
 				wb_op_next.regwrite <= '1';
 			end if;
@@ -190,16 +192,7 @@ begin  -- rtl
 
 
 		-- regimm instructions
-		when "000001" =>
-			if rd(4) = '1' then
-				exec_op_next.link <= '1';
-			end if;
-			exec_op_next.aluop <= ALU_SUB;
-			rt := rs;
-			rs := (others => '0');
-			exec_op_next.readdata1 <= rddata2;
-			exec_op_next.readdata2 <= rddata1;
-			exec_op_next.branch <= '1';
+		when "000001" => --BLTZ, BGEZ, BGTZAL, BLTZAL
 			case rd is
 			when "00000" | "10000" =>
 				jmp_op_next <= JMP_BLTZ;
@@ -208,6 +201,13 @@ begin  -- rtl
 			when others =>
 				exc_dec <= '1';
 			end case;
+			if rd(4) = '1' then
+				exec_op_next.link <= '1';
+				rd := "11111";
+				wb_op_next.regwrite <= '1';
+			end if;
+			exec_op_next.aluop <= ALU_SUB;
+			exec_op_next.branch <= '1';
 		-- Branch Instruction
 		when "000100" =>
 			exec_op_next.aluop <= ALU_SUB;
