@@ -114,7 +114,9 @@ begin  -- rtl
 			new_pc_next <= std_logic_vector(unsigned(pc_int) + 
 											unsigned(shift_left(unsigned(op_l.imm(13 downto 0)), 2)));
 		end if;
-			
+		if(op_l.regdst ='1') then
+			wrdata_next <= op_l.readdata2;		
+		end if;	
 	end process;
 
 --write new values:
