@@ -103,7 +103,7 @@ begin
 	stall <= '0';
 	rdaddr1 <= "00000"; rdaddr2<="00000";
 	wraddr <= "11100";
-	wrdata <=x"00000000";
+	wrdata <=x"00000001";
 	regwrite <= '1';
 
 	assert(or_reduce(rddata2) = '0') report "0410";
@@ -138,8 +138,14 @@ begin
 	wraddr <= "11101";
 	wrdata <= x"76543210";
 	regwrite <= '1';
-	assert(or_reduce(rddata1) = '0') report "0610";
-	assert(rddata2 = x"76543210") report "0620";
+	assert(rddata2 = x"76543210") report "0610";
+
+	wait until rising_edge(clk);
+	regwrite <= '1';
+	wraddr <= "00000";
+	wrdata <= x"FFFFFFFF";
+	assert(or_reduce(rddata1) = '0') report "0620";
+	assert(rddata2 = x"76543210") report "0630";
 	--expecting: rd1:0 rd2:76543210
 
 	wait until rising_edge(clk);
