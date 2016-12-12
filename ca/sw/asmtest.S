@@ -14,9 +14,8 @@ _start:
 		nop
 		jalr $3, $2	
 $test2:	nop
-		nop		
-		nop
 		nop	
+		nop		
 		ori $4, $0, 1
 		ori $4, $0, 2
 		nop
