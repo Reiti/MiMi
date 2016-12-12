@@ -46,7 +46,7 @@ begin  -- rtl
 		end if;
 	end process;
 
-	mux:process(clk, regwrite, wraddr, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int)
+	mymux:process(regwrite, wraddr, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int)
 	begin
 		if regwrite = '1' and wraddr = rdaddr1_int then
 			if or_reduce(rdaddr1_int) = '0' then
@@ -56,9 +56,7 @@ begin  -- rtl
 				rddata1 <= wrdata;
 			end if;
 		else
-			if rising_edge(clk) then
-				rddata1 <= rddata1_int;
-			end if;
+			rddata1 <= rddata1_int;
 		end if;
 		if regwrite = '1' and wraddr = rdaddr2_int then
 			if or_reduce(rdaddr2_int) = '0' then
@@ -68,19 +66,17 @@ begin  -- rtl
 				rddata2 <= wrdata;
 			end if;
 		else
-			if rising_edge(clk) then
-				rddata2 <= rddata2_int;
-			end if;
+			rddata2 <= rddata2_int;
 		end if;
 	end process;
 
-	latch: process(clk, reset) is
+	latch: process(clk, reset, stall, rdaddr1, rdaddr2, wraddr, wrdata) is
 	begin
 		if reset = '0' then
 			rdaddr1_int <= (others => '0');
 			rdaddr2_int <= (others => '0');
 			wraddr_int <= (others => '0');
-		elsif rising_edge(clk) and (not(stall = '1'))then
+		elsif stall /= '1' and rising_edge(clk) then
 			rdaddr1_int <= rdaddr1;
 			rdaddr2_int <= rdaddr2;
 			wraddr_int <= wraddr;

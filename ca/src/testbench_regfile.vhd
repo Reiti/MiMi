@@ -54,6 +54,8 @@ begin
 	rdaddr1 <= "00000"; rdaddr2<="00000";
 	stall <= '0';
 	regwrite <= '0';
+	wraddr <= (others => '0');
+	wrdata <= (others => '0');
 
 	wait until rising_edge(clk);
 --prep for failes stall tests:
@@ -199,7 +201,10 @@ begin
 	rdaddr1 <= "00000"; rdaddr2 <= "00000";
 	regwrite <= '0';
 
-	wait until rising_edge(clk);
+	wait until rddata1'event or rddata2'event;
+	wait until rddata1'event or rddata2'event;
+	assert(rdaddr1'last_event <= CLK_PERIOD+CLK_PERIOD/100);
+
 
 
 	wait; 
