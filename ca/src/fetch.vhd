@@ -38,8 +38,9 @@ begin  -- rtl
 	begin
 		clk_cnt_next <= clk_cnt +1;
 	end process;
-
-
+	
+  imem_addr <= pc_int(PC_WIDTH-1 downto 2);
+  
 	compute_addr: process(clk, reset, pcsrc, pc_in, clk_cnt_next) is
 	begin
 		if reset = '0' then

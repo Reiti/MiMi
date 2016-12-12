@@ -29,7 +29,7 @@ begin
 
 	mem_vllt: entity work.ocram_altera-- wos was i :D
 		port map(
-			address =>mem_out.address(9 downto 0),
+			address =>mem_out.address(11 downto 2),
 			byteena =>mem_out.byteena,
 			clock => clk,
 			data => mem_out.wrdata,
@@ -54,9 +54,8 @@ begin
   end process;
 
 
-	pipe_test: process
+	pipe_test: process(mem_out)
 	begin
-		mem_in.busy <= '0';
-		wait;
+	  mem_in.busy <= mem_out.rd;
 	end process;
 end beh;
