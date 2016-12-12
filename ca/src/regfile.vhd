@@ -70,8 +70,6 @@ begin  -- rtl
 			rdaddr1_int <= (others => '0');
 			rdaddr2_int <= (others => '0');
 			wraddr_int <= (others => '0');
-			rddata1_int <= (others => '0');
-			rddata2_int <= (others => '0');
 		elsif rising_edge(clk) and (not(stall = '1'))then
 			rdaddr1_int <= rdaddr1;
 			rdaddr2_int <= rdaddr2;
