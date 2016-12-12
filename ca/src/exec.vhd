@@ -101,7 +101,7 @@ begin  -- rtl
 			alu_in2 <= op_l.imm;
 		end if;
 
-		if(op_l.useamt ='1' or op_l.aluop = ALU_LUI) then --shift ops have A/B swapped 
+		if(op_l.useamt ='1') then --shift ops have A/B swapped 
 			alu_in2 <= op_l.readdata1;
 			alu_in1 <= op_l.imm;
 		end if;
