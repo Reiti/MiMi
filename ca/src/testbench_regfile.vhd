@@ -86,12 +86,18 @@ wait for 1*CLK_PERIOD;
 	regwrite <= '1';
 
 
-wait for 3*CLK_PERIOD;
+	wait for 3*CLK_PERIOD;
+	wait until rising_edge(clk); -- <-- need this!!!
 	stall <= '0';
 	rdaddr1<= "11100"; rdaddr2 <= "00000";
+	regwrite <= '0';
+	wait until rising_edge(clk);
 	wraddr <= "11100";
 	wrdata <= x"89ABCDEF";
 	regwrite <= '1';
+	assert(rddata1 = x"89ABCDEF");
+	assert(rddata2 = x"00000000");
+
 	--expecting: rd1:89ABCDEF rd2:0
 	--wait for 1*CLK_PERIOD;
 	--wrdata <= x"00000000";
