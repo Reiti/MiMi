@@ -48,14 +48,14 @@ begin  -- rtl
 
 	mux:process(clk, regwrite, wraddr, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int)
 	begin
-		if regwrite = '1' and wraddr = rdaddr1_int then
+		if regwrite = '1' and or_reduce(wraddr) /= '0' and wraddr = rdaddr1_int then
 			rddata1 <= wrdata;
 		else
 			if rising_edge(clk) then
 				rddata1 <= rddata1_int;
 			end if;
 		end if;
-		if regwrite = '1' and wraddr = rdaddr2_int then
+		if regwrite = '1' and or_reduce(wraddr) /= '0' and wraddr = rdaddr2_int then
 			rddata2 <= wrdata;
 		else
 			if rising_edge(clk) then
