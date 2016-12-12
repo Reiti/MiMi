@@ -81,6 +81,8 @@ begin  -- rtl
 		rd := instr_int(20 downto 16);
 		--rd := instr_int(15 downto 11);
 
+		exec_op_next.regdst <= '0';
+
 		exc_dec <= '0';
 
 		-- EXEC
@@ -314,18 +316,23 @@ begin  -- rtl
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_B;
+			exec_op_next.regdst <= '1';	
 		when "101001" =>
 			exec_op_next.aluop <= ALU_ADD;
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_H;
+
+			exec_op_next.regdst <= '1';	
 		when "101011" =>
 			exec_op_next.aluop <= ALU_ADD;
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_W;
+			
+			exec_op_next.regdst <= '1';	
 		when others =>
 			exc_dec <= '1';
 		end case;
