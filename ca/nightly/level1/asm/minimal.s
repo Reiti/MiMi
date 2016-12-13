@@ -8,16 +8,12 @@
 	                
 _start:
 		nop
-		ori $1, $0, 0xAA
+		lw $0,4($0)
 		nop
 		nop
-		sw $1,8($0)
+		sw $0,8($0)
 		nop
 		nop
-		lw $2,8($0)
-		nop
-		nop
-
 
 		.end _start
 		.size _start, .-_start

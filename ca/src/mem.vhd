@@ -38,8 +38,8 @@ architecture rtl of mem is
 	signal pc_in_int, new_pc_in_int: std_logic_vector(PC_WIDTH-1 downto 0);
 	signal rd_in_int: std_logic_vector(REG_BITS-1 downto 0);
 	signal aluresult_in_int: std_logic_vector(DATA_WIDTH-1 downto 0);
-	signal wbop_in_int: wb_op_type;
-	signal mem_op_int: mem_op_type;
+	signal wbop_in_int: wb_op_type := WB_NOP;
+	signal mem_op_int: mem_op_type := MEM_NOP;
 	signal wrdata_int: std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal mem_data_int: std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal jmp_op_int: jmp_op_type;

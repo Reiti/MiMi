@@ -30,15 +30,15 @@ end decode;
 architecture rtl of decode is
 	constant OPCODE_WIDTH : integer := 6;
 
-	signal instr_int : std_logic_vector(INSTR_WIDTH-1 downto 0);
+	signal instr_int : std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
 	signal pc_int : std_logic_vector(PC_WIDTH-1 downto 0);
 	signal wraddr_int : std_logic_vector(REG_BITS-1 downto 0);
 	signal wrdata_int : std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal regwrite_int : std_logic;
-	signal exec_op_next    : exec_op_type;
-	signal jmp_op_next     : jmp_op_type;
-	signal mem_op_next     : mem_op_type;
-	signal wb_op_next      : wb_op_type;
+	signal exec_op_next    : exec_op_type := EXEC_NOP;
+	signal jmp_op_next     : jmp_op_type := JMP_NOP;
+	signal mem_op_next     : mem_op_type := MEM_NOP;
+	signal wb_op_next      : wb_op_type := WB_NOP;
 
 
 	signal rdaddr1, rdaddr2 : std_logic_vector(REG_BITS-1 downto 0);
