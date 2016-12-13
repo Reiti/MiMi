@@ -195,6 +195,7 @@ begin  -- rtl
 
 		-- regimm instructions
 		when "000001" => --BLTZ, BGEZ, BGTZAL, BLTZAL
+			exec_op_next.readdata2 <= x"00000000";
 			case rd is
 			when "00000" | "10000" =>
 				jmp_op_next <= JMP_BLTZ;

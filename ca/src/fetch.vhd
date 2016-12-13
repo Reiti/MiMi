@@ -18,7 +18,7 @@ end fetch;
 
 architecture rtl of fetch is
 	constant testbench_fetch_stall : integer := 0;
-	signal imem_addr: std_logic_vector(11 downto 0);
+	signal imem_addr: std_logic_vector(11 downto 0) := (others => '0');
 	signal pc_int, pc_next: std_logic_vector(PC_WIDTH-1 downto 0);
 	signal instr_next, instr_next_next : std_logic_vector(INSTR_WIDTH-1 downto 0) := (others => '0');
 begin  -- rtl
@@ -31,15 +31,17 @@ begin  -- rtl
 		q => instr_next
 	);
 
-	imem_addr <= pc_int(PC_WIDTH-1 downto 2);
+	
 
 	i : process(instr_next, stall, pc_int, pc_next, instr_next_next) is
 	begin
-		instr <= instr_next;
+		instr <= instr_next_next;
 		pc_out <= std_logic_vector(unsigned(pc_next));
+		imem_addr <= std_logic_vector(unsigned(pc_next(PC_WIDTH -1 downto 2)));
 		if stall = '0' then 
-			instr <= instr_next_next;	
+			instr <= instr_next;
 			pc_out <= pc_int;
+			imem_addr <= pc_int(PC_WIDTH-1 downto 2);
 		end if;
 	end process;
 

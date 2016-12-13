@@ -143,7 +143,7 @@ begin  -- rtl
 			--wbop_out_next <= WB_NOP;
 		elsif flush = '1' then
 			null;	
-		elsif (rising_edge(clk) and not stall = '1') or (rising_edge(clk) and stall = 'U') then
+		elsif (rising_edge(clk) and not stall = '1') then
 			--latch new values
 			op_l<=op;
 			pc_int <= pc_in;
