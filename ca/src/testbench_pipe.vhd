@@ -54,9 +54,8 @@ begin
   end process;
 
 
-	pipe_test: process
+	pipe_test: process(mem_out)
 	begin
-		mem_in.busy <= '0';
-		wait;
+	  mem_in.busy <= mem_out.rd;
 	end process;
 end beh;

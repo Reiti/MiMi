@@ -36,19 +36,19 @@ end exec;
 
 architecture rtl of exec is
 	signal rd_next, rs_next, rt_next : std_logic_vector(REG_BITS-1 downto 0);
-	signal aluresult_next : std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal aluresult_next : std_logic_vector(DATA_WIDTH-1 downto 0) := (others =>'0');
 	signal wrdata_next : std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal zero_next, neg_next : std_logic;
-	signal memop_out_next : mem_op_type;
-	signal jmpop_out_next : jmp_op_type;
-	signal wbop_out_next  :  wb_op_type;
+	signal memop_out_next : mem_op_type := MEM_NOP;
+	signal jmpop_out_next : jmp_op_type := JMP_NOP;
+	signal wbop_out_next  :  wb_op_type := WB_NOP;
 	signal exc_ovf_next   : std_logic;
 
 	signal new_pc_next : std_logic_vector(PC_WIDTH-1 downto 0);
 	--latches
 	signal op_l : exec_op_type;
 	signal pc_int: std_logic_vector(PC_WIDTH-1 downto 0);
-	signal memop_int : mem_op_type;
+	signal memop_int : mem_op_type := MEM_NOP;
 	signal jmpop_int : jmp_op_type;
 	signal wbop_int  : wb_op_type;
 
@@ -80,13 +80,13 @@ begin  -- rtl
 		wrdata_next <= alu_out; -- wrdata ignored, when not needed
 		zero_next <= alu_Z;
 		neg_next <= alu_out(DATA_WIDTH-1);--alu_V;
-		-- MEM
-		memop_out_next <= memop_int;
-		-- JUMP
-		jmpop_out_next <= jmpop_int;
-		-- WB
-		wbop_out_next <= wbop_int;
 		
+		memop_out_next <= memop_int;
+			jmpop_out_next <= jmpop_int;
+			wbop_out_next <= wbop_int;
+
+
+
 		exc_ovf_next <= alu_V;	
 
 		--std alu operands
@@ -128,9 +128,9 @@ begin  -- rtl
 	wrdata <= wrdata_next;
 	zero <= zero_next;
 	neg <= neg_next;
-	memop_out <= memop_out_next;
-	jmpop_out <= jmpop_out_next;
-	wbop_out <= wbop_out_next;
+	memop_out <= memop_int;
+	jmpop_out <= jmpop_int;
+	wbop_out <= wbop_int;
 	exc_ovf <= exc_ovf_next;
 	
 	new_pc <= new_pc_next;
@@ -138,10 +138,12 @@ begin  -- rtl
 	sync:process(clk, reset, stall, flush, op, pc_in, memop_in, jmpop_in, wbop_in)
 	begin
 		if reset = '0' then
-			null;
+			--memop_out_next <= MEM_NOP;
+			--jmpop_out_next <= JMP_NOP;
+			--wbop_out_next <= WB_NOP;
 		elsif flush = '1' then
 			null;	
-		elsif rising_edge(clk) and not stall = '1' then
+		elsif (rising_edge(clk) and not stall = '1') then
 			--latch new values
 			op_l<=op;
 			pc_int <= pc_in;

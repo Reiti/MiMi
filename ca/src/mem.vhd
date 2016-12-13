@@ -38,8 +38,8 @@ architecture rtl of mem is
 	signal pc_in_int, new_pc_in_int: std_logic_vector(PC_WIDTH-1 downto 0);
 	signal rd_in_int: std_logic_vector(REG_BITS-1 downto 0);
 	signal aluresult_in_int: std_logic_vector(DATA_WIDTH-1 downto 0);
-	signal wbop_in_int: wb_op_type;
-	signal mem_op_int: mem_op_type;
+	signal wbop_in_int: wb_op_type := WB_NOP;
+	signal mem_op_int: mem_op_type := MEM_NOP;
 	signal wrdata_int: std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal mem_data_int: std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal jmp_op_int: jmp_op_type;
@@ -62,11 +62,11 @@ begin  -- rtl
 	port map
 	(
 		op => mem_op_int,--_int,
-		A => aluresult_in(ADDR_WIDTH-1 downto 0), --_int
-		W => wrdata,--_int,
+		A => aluresult_in_int(ADDR_WIDTH-1 downto 0), --_int
+		W => wrdata_int,--_int,
 		D => mem_data,--_int,
 		M => mem_out,
-		R => memresult_out,
+		R => memresult,--_out,
 		XL => exc_load,
 		XS => exc_store
 	);
@@ -80,18 +80,18 @@ begin  -- rtl
 		J => pcsrc
 	);
 
-	director: process(stall, memresult_out, mem_op, jmp_op, flush) is
+	director: process(stall, memresult_out, mem_op, jmp_op, flush, aluresult_in) is
 	begin 
-		mem_op_int <= mem_op;
+		--mem_op_int <= mem_op;
 		jmp_op_int <= jmp_op;
 		if stall = '1' then
-			mem_op_int.memread <= '0';
-			mem_op_int.memwrite <= '0';
+			--mem_op_int.memread <= '0';
+			--mem_op_int.memwrite <= '0';
 		else
-			memresult <= memresult_out;
+			--memresult <= memresult_out;
 		end if;
 		if flush = '1' then
-			mem_op_int <= MEM_NOP;
+			--mem_op_int <= MEM_NOP;
 			jmp_op_int <= JMP_NOP;
 		end if;
 	end process;
@@ -104,9 +104,9 @@ begin  -- rtl
 			rd_in_int <= (others => '0');
 			aluresult_in_int <= (others => '0');
 			wbop_in_int <= WB_NOP; 
-			--mem_op_int <= MEM_NOP;
-			--wrdata_int <= (others => '0');
-			--mem_data_int <= (others => '0');
+			mem_op_int <= MEM_NOP;
+			wrdata_int <= (others => '0');
+			mem_data_int <= (others => '0');
 			--neg_int <= '0';
 			--zero_int <= '0';
 			--jmp_op_int <= JMP_NOP;
@@ -116,12 +116,16 @@ begin  -- rtl
 			rd_in_int <= rd_in;
 			aluresult_in_int <= aluresult_in;
 			wbop_in_int <= wbop_in;
-		--	mem_op_int <= mem_op;
-			--wrdata_int <= wrdata;
+		  	mem_op_int <= mem_op;
+			wrdata_int <= wrdata;
 			--mem_data_int <= mem_data;
 			--neg_int <= neg;
 			--zero_int <= zero;
 			--jmp_op_int <= jmp_op;
+		end if;
+		if rising_edge(clk) and stall = '1' then
+		  mem_op_int.memread <= '0';
+		  mem_op_int.memwrite <= '0';
 		end if;
 	end process;
 
