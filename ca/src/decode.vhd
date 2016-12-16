@@ -44,6 +44,8 @@ architecture rtl of decode is
 	signal rdaddr1, rdaddr2 : std_logic_vector(REG_BITS-1 downto 0);
 	signal rddata1, rddata2 : std_logic_vector(DATA_WIDTH-1 downto 0);
 
+	signal regwrite_l : std_logic;
+
 	function sign_ext(signal x:in std_logic_vector; constant i, N:integer)
 		return std_logic_vector is
 	begin
@@ -62,7 +64,7 @@ begin  -- rtl
 
 	wrdata_int <= wrdata;
 	wraddr_int <= wraddr;
-	regwrite_int <= regwrite;
+	regwrite_int <= regwrite_l;
 
 
 
@@ -194,7 +196,7 @@ begin  -- rtl
 
 
 		-- regimm instructions
-		when "000001" => --BLTZ, BGEZ, BGEZAL, BLTZAL
+		when "000001" => --BLTZ, BGEZ, BGTZAL, BLTZAL
 			exec_op_next.readdata2 <= x"00000000";
 			case rd is
 			when "00000" | "10000" =>
@@ -243,7 +245,6 @@ begin  -- rtl
 			wb_op_next.regwrite <= '1';
 		when "001001" =>
 			exec_op_next.aluop <= ALU_ADD;
-			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001010" =>
@@ -252,7 +253,7 @@ begin  -- rtl
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001011" =>
-			exec_op_next.aluop <= ALU_SLT;
+			exec_op_next.aluop <= ALU_SLTU;
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001100" =>
@@ -324,15 +325,13 @@ begin  -- rtl
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_H;
-
 			exec_op_next.regdst <= '1';	
 		when "101011" =>
 			exec_op_next.aluop <= ALU_ADD;
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			mem_op_next.memwrite <= '1';
-			mem_op_next.memtype <= MEM_W;
-			
+			mem_op_next.memtype <= MEM_W;	
 			exec_op_next.regdst <= '1';	
 		when others =>
 			exc_dec <= '1';
@@ -367,7 +366,7 @@ begin  -- rtl
 			instr_int <= instr;
 			pc_int <=	--signal regwrite : std_logic;
  pc_in;
-
+			regwrite_l <= regwrite;
 		end if;
 	end process;
 
