@@ -100,17 +100,14 @@ begin  -- rtl
 		if(op_l.useimm = '1') then
 			alu_in2 <= op_l.imm;
 		end if;
-		if(op_l.aluop = ALU_SLL or op_l.aluop = ALU_SRL or op_l.aluop = ALU_SRA) then
-			alu_in2 <= op_l.readdata1;
-			alu_in1 <= op_l.readdata2;
-			if(op_l.useamt ='1') then --shift ops have A/B swapped 
-				alu_in2 <= op_l.readdata2;
-				alu_in1 <= std_logic_vector(resize(unsigned(op_l.imm(10 downto 6)), alu_in1'length));
-			end if;
+
+		if(op_l.useamt ='1') then --shift ops with imm have A/B swapped 
+			alu_in2 <= op_l.readdata2;
+			alu_in1 <= op_l.imm;--std_logic_vector(resize(unsigned(op_l.imm(10 downto 6)), alu_in1'length));
 		end if;
+
 		if op_l.link = '1' then --link! regwrite is active-> pc shoudl go to r31/ jalr rd
 			aluresult_next <= std_logic_vector(resize(unsigned(pc_int) +4 , aluresult_next'length));
-			report "hey";
 			--new_pc_next <= std_logic_vector(unsigned(shift_left(unsigned(op_l.imm(13 downto 0)), 2)));
 		end if;	
 		if (op_l.branch = '1')	then

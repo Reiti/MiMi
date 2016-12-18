@@ -120,6 +120,8 @@ begin  -- rtl
 					if(instr_int(10 downto 6) /= "00000") then
 						exec_op_next.aluop <= ALU_SLL;
 						exec_op_next.useamt <= '1';
+						exec_op_next.imm <= std_logic_vector(resize(unsigned(instr_int(10 downto 6)), 
+																exec_op_next.imm'length));
 					else
 						exec_op_next <= EXEC_NOP;
 						wb_op_next.regwrite <= '0';
@@ -127,9 +129,13 @@ begin  -- rtl
 				when "000010" =>
 					exec_op_next.aluop <= ALU_SRL;
 					exec_op_next.useamt <= '1';
+					exec_op_next.imm <= std_logic_vector(resize(unsigned(instr_int(10 downto 6)), 
+																exec_op_next.imm'length));
 				when "000011" =>
 					exec_op_next.aluop <= ALU_SRA;
 					exec_op_next.useamt <= '1';
+					exec_op_next.imm <= std_logic_vector(resize(unsigned(instr_int(10 downto 6)), 
+																exec_op_next.imm'length));
 				when "000100" =>
 					exec_op_next.aluop <= ALU_SLL;
 				when "000110" =>
@@ -181,7 +187,7 @@ begin  -- rtl
 			
 			jmp_op_next <= JMP_JMP;
 			exec_op_next.aluop <= ALU_SLL;
-			exec_op_next.readdata1 <= std_logic_vector(resize(unsigned(instr_int(25 downto 0)), 
+			exec_op_next.readdata2 <= std_logic_vector(resize(unsigned(instr_int(25 downto 0)), 
 																	exec_op_next.readdata1'length));
 			exec_op_next.imm(25 downto 0) <= std_logic_vector(to_unsigned( 2, 
 																		exec_op_next.imm(25 downto 0)'length));
@@ -245,6 +251,7 @@ begin  -- rtl
 			wb_op_next.regwrite <= '1';
 		when "001001" =>
 			exec_op_next.aluop <= ALU_ADD;
+			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			exec_op_next.useimm <= '1';
 			wb_op_next.regwrite <= '1';
 		when "001010" =>
