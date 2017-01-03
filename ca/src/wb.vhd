@@ -27,17 +27,17 @@ architecture rtl of wb is
 	signal op_int: wb_op_type;
 begin  -- rtl
 
-	wb_out: process(op, aluresult, memresult, rd_in) is
-	begin
-		regwrite <= op.regwrite;
-		if op.memtoreg = '1' then
-			result <= memresult;
-		else
-			result <= aluresult;
-		end if;
-			rd_out <= rd_in;
-	end process;
-
+--	wb_out: process(op, aluresult, memresult, rd_in) is
+--	begin
+--		regwrite <= op.regwrite;
+--		if op.memtoreg = '1' then
+--			result <= memresult;
+--		else
+--			result <= aluresult;
+--		end if;
+--			rd_out <= rd_in;
+--	end process;
+--
 
 	--rd_out <= rd_in_int;
 		
@@ -53,6 +53,15 @@ begin  -- rtl
 			--memresult_int <= memresult;
 
 			--op_int <= op;
+
+			rd_out <= rd_in;
+			regwrite <= op.regwrite;
+			if op.memtoreg = '1' then
+				result <= memresult;
+			else
+				result <= aluresult;
+			end if;
+
 		end if;
 	end process;
 end rtl;

@@ -29,9 +29,9 @@ architecture rtl of regfile is
 
 begin  -- rtl
 
-	readwrite: process(rdaddr1_int, rdaddr2_int, wraddr_int, wrdata_int, regwrite, regfile) is
+	readwrite: process(clk, rdaddr1_int, rdaddr2_int, wraddr_int, wrdata_int, regwrite, regfile) is
 	begin
-		if regwrite = '1' and or_reduce(wraddr_int) /= '0' then
+		if regwrite = '1' and or_reduce(wraddr_int) /= '0' and clk = '0' then
 			regfile(to_integer(unsigned(wraddr_int))) <= wrdata_int;
 		end if;
 		if or_reduce(rdaddr1_int) = '0' then

@@ -93,17 +93,28 @@ begin  -- rtl
 		alu_op <= op_l.aluop;
 		
 		alu_in1 <= op_l.readdata1;
-		alu_in2 <= op_l.readdata2;	
+		alu_in2 <= op_l.readdata2;
+
+		if forwardA = FWD_ALU then
+			alu_in1 <= mem_aluresult;
+		elsif forwardA = FWD_WB then
+			alu_in1 <= wb_result;
+		end if;
+
+		if forwardB = FWD_ALU then
+			alu_in2 <= mem_aluresult;
+		elsif forwardB = FWD_WB then
+			alu_in2 <= wb_result;
+		end if;
+
 		
 		-- if needed, jump will jump there, or else its ignored anyway
 		new_pc_next <= alu_out(13 downto 0);--std_logic_vector(unsigned(shift_left(unsigned(alu_out(13 downto 0)),2)));	
-		if(op_l.useimm = '1') then
-			alu_in2 <= op_l.imm;
-		end if;
 
-		if(op_l.useamt ='1') then --shift ops with imm have A/B swapped 
-			alu_in2 <= op_l.readdata2;
-			alu_in1 <= op_l.imm;--std_logic_vector(resize(unsigned(op_l.imm(10 downto 6)), alu_in1'length));
+		if op_l.useamt = '1' then
+			alu_in1 <= op_l.imm;
+		elsif op_l.useimm = '1' then
+			alu_in2 <= op_l.imm;
 		end if;
 
 		if op_l.link = '1' then --link! regwrite is active-> pc shoudl go to r31/ jalr rd

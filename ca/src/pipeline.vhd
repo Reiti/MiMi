@@ -188,6 +188,17 @@ begin  -- rtl
 		rd_out => wb_rd
 	);
 
+	fwd_inst: entity work.fwd
+	port map(
+		forwardA => forwardA,
+		forwardB => forwardB,
+		exec_rs => rs,
+		exec_rt => rt,
+		mem_rd => mem_rd,
+		wb_rd => wb_rd
+	);
+
+
 end rtl;
 
 

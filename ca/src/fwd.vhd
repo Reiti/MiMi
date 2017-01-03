@@ -7,7 +7,12 @@ use work.op_pack.all;
 
 entity fwd is
 	port (
-		-- define input and output ports as needed
+	forwardA         : out fwd_type;
+	forwardB         : out fwd_type;
+	exec_rs : in std_logic_vector(REG_BITS-1 downto 0);
+	exec_rt : in std_logic_vector(REG_BITS-1 downto 0);
+	mem_rd : in std_logic_vector(REG_BITS-1 downto 0);
+	wb_rd : in std_logic_vector(REG_BITS-1 downto 0)
 );
 	
 end fwd;
@@ -15,5 +20,25 @@ end fwd;
 architecture rtl of fwd is
 
 begin  -- rtl
+
+	supermux : process(exec_rs, exec_rt, mem_rd, wb_rd)
+	begin
+		forwardA <= FWD_NONE;
+		forwardB <= FWD_NONE;
+
+		if exec_rs = mem_rd then
+			forwardA <= FWD_ALU;
+		end if;
+		if exec_rt = mem_rd then
+			forwardB <= FWD_ALU;
+		end if;
+
+		if exec_rs = wb_rd then
+			forwardA <= FWD_WB;
+		end if;
+		if exec_rt = wb_rd then
+			forwardB <= FWD_WB;
+		end if;
+	end process;
 
 end rtl;
