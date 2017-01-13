@@ -70,7 +70,7 @@ begin  -- rtl
 		V => alu_V
 	);
 
-	exec: process(pc_int, op_l, memop_int, jmpop_int, wbop_int, alu_out, alu_Z, alu_V)
+	exec: process(pc_int, op_l, memop_int, jmpop_int, wbop_int, alu_out, alu_Z, alu_V, forwardA, forwardB, mem_aluresult, wb_result)
 	begin
 		rd_next <= op_l.rd;
 		rs_next <= op_l.rs;
@@ -82,8 +82,8 @@ begin  -- rtl
 		neg_next <= alu_out(DATA_WIDTH-1);--alu_V;
 		
 		memop_out_next <= memop_int;
-			jmpop_out_next <= jmpop_int;
-			wbop_out_next <= wbop_int;
+		jmpop_out_next <= jmpop_int;
+		wbop_out_next <= wbop_int;
 
 
 

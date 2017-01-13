@@ -26,18 +26,18 @@ begin  -- rtl
 		forwardA <= FWD_NONE;
 		forwardB <= FWD_NONE;
 
-		if exec_rs = mem_rd and or_reduce(exec_rs) /= '0' then
-			forwardA <= FWD_ALU;
-		end if;
-		if exec_rt = mem_rd and or_reduce(exec_rt) /= '0' then
-			forwardB <= FWD_ALU;
-		end if;
-
 		if exec_rs = wb_rd and or_reduce(exec_rs) /= '0' then
 			forwardA <= FWD_WB;
 		end if;
 		if exec_rt = wb_rd and or_reduce(exec_rt) /= '0' then
 			forwardB <= FWD_WB;
+		end if;
+
+		if exec_rs = mem_rd and or_reduce(exec_rs) /= '0' then
+			forwardA <= FWD_ALU;
+		end if;
+		if exec_rt = mem_rd and or_reduce(exec_rt) /= '0' then
+			forwardB <= FWD_ALU;
 		end if;
 	end process;
 

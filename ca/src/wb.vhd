@@ -40,8 +40,8 @@ begin  -- rtl
 --
 
 	--rd_out <= rd_in_int;
-		
-	latch: process(clk, reset, stall, flush) is
+
+	latch: process(clk, reset, stall, flush, op, memresult, aluresult) is
 	begin
 		if reset = '0' or flush = '1' then
 			aluresult_int <= (others => '0');
@@ -51,7 +51,6 @@ begin  -- rtl
 		elsif rising_edge(clk) and (not(stall = '1')) then
 			--aluresult_int <= aluresult;
 			--memresult_int <= memresult;
-
 			--op_int <= op;
 
 			rd_out <= rd_in;
