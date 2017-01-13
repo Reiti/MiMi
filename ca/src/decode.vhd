@@ -326,6 +326,10 @@ begin  -- rtl
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_B;
 			exec_op_next.regdst <= '1';	
+
+			rs := (others => '0');
+			rt := (others => '0');
+			rd := (others => '0');
 		when "101001" =>
 			exec_op_next.aluop <= ALU_ADD;
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
@@ -333,6 +337,9 @@ begin  -- rtl
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_H;
 			exec_op_next.regdst <= '1';	
+			rs := (others => '0');
+			rt := (others => '0');
+			rd := (others => '0');
 		when "101011" =>
 			exec_op_next.aluop <= ALU_ADD;
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
@@ -340,6 +347,9 @@ begin  -- rtl
 			mem_op_next.memwrite <= '1';
 			mem_op_next.memtype <= MEM_W;	
 			exec_op_next.regdst <= '1';	
+			rs := (others => '0');
+			rt := (others => '0');
+			rd := (others => '0');
 		when others =>
 			exc_dec <= '1';
 		end case;
