@@ -43,6 +43,9 @@ architecture rtl of decode is
 	signal rdaddr1, rdaddr2 : std_logic_vector(REG_BITS-1 downto 0);
 	signal rddata1, rddata2 : std_logic_vector(DATA_WIDTH-1 downto 0);
 
+	signal f : std_logic;
+
+
 
 	function sign_ext(signal x:in std_logic_vector; constant i, N:integer)
 		return std_logic_vector is
@@ -216,17 +219,23 @@ begin  -- rtl
 			end if;
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
+			rd := instr_int(25 downto 21);
+			rs := instr_int(20 downto 16);
 		-- Branch Instruction
 		when "000100" =>
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BEQ;
+			rd := instr_int(25 downto 21);
+			rs := instr_int(20 downto 16);
 		when "000101" =>
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BNE;
+			rd := instr_int(25 downto 21);
+			rs := instr_int(20 downto 16);
 		when "000110" =>
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
@@ -239,7 +248,6 @@ begin  -- rtl
 			exec_op_next.rt <= (others => '0');
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BGTZ;
-
 		-- Extra ALU Instructions
 		when "001000" =>
 			exec_op_next.aluop <= ALU_ADD;
@@ -368,7 +376,12 @@ begin  -- rtl
 	begin
 		if reset = '0' then
 			null;
-		elsif flush = '1' then
+		elsif (flush = '1'  and rising_edge(clk)) or (f = '1' and rising_edge(clk)) then
+			if f = '1' then
+				f <= '0';
+			else 
+				f <= '1';
+			end if;
 			instr_int <= (others => '0');
 			pc_int <= (others => '0');
 			--wraddr_int <= (others => '0');
