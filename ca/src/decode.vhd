@@ -34,7 +34,6 @@ architecture rtl of decode is
 	signal pc_int : std_logic_vector(PC_WIDTH-1 downto 0);
 	signal wraddr_int : std_logic_vector(REG_BITS-1 downto 0);
 	signal wrdata_int : std_logic_vector(DATA_WIDTH-1 downto 0);
-	signal regwrite_int : std_logic;
 	signal exec_op_next    : exec_op_type := EXEC_NOP;
 	signal jmp_op_next     : jmp_op_type := JMP_NOP;
 	signal mem_op_next     : mem_op_type := MEM_NOP;
@@ -44,7 +43,6 @@ architecture rtl of decode is
 	signal rdaddr1, rdaddr2 : std_logic_vector(REG_BITS-1 downto 0);
 	signal rddata1, rddata2 : std_logic_vector(DATA_WIDTH-1 downto 0);
 
-	signal regwrite_l : std_logic;
 
 	function sign_ext(signal x:in std_logic_vector; constant i, N:integer)
 		return std_logic_vector is
@@ -64,14 +62,13 @@ begin  -- rtl
 
 	wrdata_int <= wrdata;
 	wraddr_int <= wraddr;
-	regwrite_int <= regwrite_l;
 
 
 
 	registers:entity work.regfile
 	port map(clk => clk, reset => reset, stall => stall, rdaddr1 => rdaddr1,
 		rdaddr2 => rdaddr2, rddata1 => rddata1, rddata2 => rddata2,
-		wraddr => wraddr_int, wrdata => wrdata_int, regwrite => regwrite_int);
+		wraddr => wraddr_int, wrdata => wrdata_int, regwrite => regwrite);
 
 	decode:process(instr_int, pc_int, wraddr, wrdata, regwrite, rddata1, rddata2)
 	variable opcode : std_logic_vector(OPCODE_WIDTH-1 downto 0);
@@ -376,14 +373,11 @@ begin  -- rtl
 			pc_int <= (others => '0');
 			--wraddr_int <= (others => '0');
 			--wrdata_int <= (others => '0');
-			--regwrite_int <= '0';
 		elsif rising_edge(clk) and not stall = '1' then
 			
 			-- latch new values
 			instr_int <= instr;
-			pc_int <=	--signal regwrite : std_logic;
- pc_in;
-			regwrite_l <= regwrite;
+			pc_int <= pc_in;
 		end if;
 	end process;
 

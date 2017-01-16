@@ -41,7 +41,7 @@ begin  -- rtl
 
 	--rd_out <= rd_in_int;
 
-	latch: process(clk, reset, stall, flush, op, memresult, aluresult) is
+	latch: process(clk, reset, stall, flush, rd_in, op, memresult, aluresult) is
 	begin
 		if reset = '0' or flush = '1' then
 			aluresult_int <= (others => '0');
