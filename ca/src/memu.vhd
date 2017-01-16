@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.std_logic_misc.all;
 
 use work.core_pack.all;
 use work.op_pack.all;
@@ -26,8 +27,9 @@ architecture rtl of memu is
 begin  -- rtl
   acc_type <= A(1 downto 0);
 
-	mem_out: process(op, A, W, acc_type) is
+	mem_out: process(op, W, acc_type) is
 	begin
+		M.wrdata <= (others => '0');
 		case op.memtype is
 			when MEM_B | MEM_BU =>
 				case acc_type is
@@ -62,7 +64,7 @@ begin  -- rtl
 		end case;
 	end process;
 
-	mem_in: process(op, A, D, acc_type) is
+	mem_in: process(op, D, acc_type) is
 	begin
     case op.memtype is
       when MEM_B =>
@@ -117,7 +119,7 @@ begin  -- rtl
 		M.address <= A;
 		M.rd <= op.memread;
 		if op.memread = '1' then
-			if acc_type = "00" and A(ADDR_WIDTH-1 downto 2) = (ADDR_WIDTH-1 downto 2 => '0') then
+			if acc_type = "00" and or_reduce(A(ADDR_WIDTH-1 downto 2)) = '0' then
 				XL <= '1';
 				M.rd <= '0';
 			else
@@ -144,7 +146,7 @@ begin  -- rtl
 		M.address <= A;
 		M.wr <= op.memwrite;
 		if op.memwrite = '1' then
-			if acc_type = "00" and A(ADDR_WIDTH-1 downto 2) = (ADDR_WIDTH-1 downto 2 => '0') then
+			if acc_type = "00" and or_reduce(A(ADDR_WIDTH-1 downto 2)) = '0' then
 				XS <= '1';
 				M.wr <= '0';
 			else

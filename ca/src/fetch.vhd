@@ -46,7 +46,7 @@ begin  -- rtl
 	end process;
 
 
-  	compute_addr: process(clk, reset, pcsrc, pc_in, pc_int, instr_next) is
+  	compute_addr: process(clk, reset, stall, pcsrc, pc_in, pc_int, instr_next) is
 	variable x : std_logic_vector(PC_WIDTH-1 downto 0);
 	begin
 		if reset = '0' then

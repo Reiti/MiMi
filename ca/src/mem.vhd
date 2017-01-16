@@ -55,9 +55,6 @@ begin  -- rtl
 	new_pc_out <= new_pc_in;--_int;
 	wbop_out <= wbop_in_int;
 
-
-
-
 	memo: entity work.memu
 	port map
 	(
@@ -80,7 +77,7 @@ begin  -- rtl
 		J => pcsrc
 	);
 
-	director: process(stall, memresult_out, mem_op, jmp_op, flush, aluresult_in) is
+	director: process(stall, flush, jmp_op) is
 	begin 
 		--mem_op_int <= mem_op;
 		jmp_op_int <= jmp_op;
@@ -96,7 +93,7 @@ begin  -- rtl
 		end if;
 	end process;
 
-	latch: process(clk, reset, pc_in, new_pc_in, rd_in, aluresult_in, wbop_in, mem_op, wrdata, mem_data) is
+	latch: process(clk, reset, stall, flush, pc_in, new_pc_in, rd_in, aluresult_in, wbop_in, mem_op, wrdata, mem_data) is
 	begin
 		if reset = '0' or flush = '1' then
 			pc_in_int <= (others => '0');
@@ -124,8 +121,8 @@ begin  -- rtl
 			--jmp_op_int <= jmp_op;
 		end if;
 		if rising_edge(clk) and stall = '1' then
-		  mem_op_int.memread <= '0';
-		  mem_op_int.memwrite <= '0';
+			mem_op_int.memread <= '0';
+			mem_op_int.memwrite <= '0';
 		end if;
 	end process;
 

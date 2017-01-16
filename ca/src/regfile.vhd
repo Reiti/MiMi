@@ -22,23 +22,14 @@ architecture rtl of regfile is
 	type regfile_type is array(0 to REG_COUNT-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
 
 	signal rdaddr1_int, rdaddr2_int: std_logic_vector(REG_BITS-1 downto 0);
-	signal rddata1_int, rddata2_int: std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
-	signal wraddr_int: std_logic_vector(REG_BITS-1 downto 0) := (others => '0');
-	signal wrdata_int : std_logic_vector(DATA_WIDTH-1 downto 0);
-	signal regfile: regfile_type := (others => (others => '0'));
-	signal regwrite_int : std_logic;
+	signal rddata1_int, rddata2_int: std_logic_vector(DATA_WIDTH-1 downto 0);
+--	signal wraddr_int: std_logic_vector(REG_BITS-1 downto 0);
+--	signal wrdata_int : std_logic_vector(DATA_WIDTH-1 downto 0);
+--	signal regwrite_int : std_logic;
+	signal regfile: regfile_type;
 	-- signal forw : std_logic; -- debug signal
 
 begin  -- rtl
-
-	readwrite: process(rdaddr1_int, rdaddr2_int, wraddr_int, wrdata_int, regwrite_int, regfile) is
-	begin
-		if regwrite_int = '1' and or_reduce(wraddr_int) /= '0' then
-			regfile(to_integer(unsigned(wraddr_int))) <= wrdata_int;
-		end if;
-		rddata1_int <= regfile(to_integer(unsigned(rdaddr1_int)));
-		rddata2_int <= regfile(to_integer(unsigned(rdaddr2_int)));
-	end process;
 
 	forwarder:process(regwrite, wraddr, wrdata, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int) is
 	variable fwd : boolean;
@@ -69,18 +60,23 @@ begin  -- rtl
 	latch: process(clk, reset, stall, rdaddr1, rdaddr2, wraddr, wrdata, regwrite) is
 	begin
 		if reset = '0' then
+			for I in regfile'range loop
+				regfile(I) <= (others => '0');
+			end loop;
 			rdaddr1_int <= (others => '0');
 			rdaddr2_int <= (others => '0');
-			wraddr_int <= (others => '0');
-			wrdata_int <= (others => '0');
-			regwrite_int <= '0';
+			rddata1_int <= (others => '0');
+			rddata2_int <= (others => '0');
 			--assert(forw = '0');
 		elsif stall /= '1' and rising_edge(clk) then
+			if regwrite = '1' and or_reduce(wraddr) /= '0' then
+				regfile(to_integer(unsigned(wraddr))) <= wrdata;
+			end if;
+			rddata1_int <= regfile(to_integer(unsigned(rdaddr1)));
+			rddata2_int <= regfile(to_integer(unsigned(rdaddr2)));
+
 			rdaddr1_int <= rdaddr1;
 			rdaddr2_int <= rdaddr2;
-			wraddr_int <= wraddr;
-			wrdata_int <= wrdata;
-			regwrite_int <= regwrite;
 		end if;
 	end process;
 end rtl;
