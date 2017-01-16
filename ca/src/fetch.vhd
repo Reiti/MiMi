@@ -12,7 +12,8 @@ entity fetch is
 		pcsrc	   : in	 std_logic;
 		pc_in	   : in	 std_logic_vector(PC_WIDTH-1 downto 0);
 		pc_out	   : out std_logic_vector(PC_WIDTH-1 downto 0);
-		instr	   : out std_logic_vector(INSTR_WIDTH-1 downto 0));
+		instr	   : out std_logic_vector(INSTR_WIDTH-1 downto 0)
+		);
 
 end fetch;
 

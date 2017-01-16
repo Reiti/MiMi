@@ -8,7 +8,8 @@ use work.op_pack.all;
 entity ctrl is
 	
 	port (
-		-- define input and output ports as needed
+		J : in std_logic;
+		flush : out std_logic 
 );
 
 end ctrl;
@@ -16,5 +17,11 @@ end ctrl;
 architecture rtl of ctrl is
 
 begin  -- rtl
+
+	pro: process(J) is
+	begin 
+		flush <= J;
+	end process;
+
 
 end rtl;

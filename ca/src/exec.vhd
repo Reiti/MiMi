@@ -96,9 +96,17 @@ begin  -- rtl
 		alu_in2 <= op_l.readdata2;
 
 		if forwardA = FWD_ALU then
-			alu_in1 <= mem_aluresult;
+			if op_l.branch = '1' then
+				alu_in2 <= mem_aluresult;
+			else
+				alu_in1 <= mem_aluresult;
+			end if;
 		elsif forwardA = FWD_WB then
-			alu_in1 <= wb_result;
+			if op_l.branch = '1' then
+				alu_in2 <= wb_result;
+			else 
+				alu_in1 <= wb_result;
+			end if;
 		end if;
 
 		if forwardB = FWD_ALU then

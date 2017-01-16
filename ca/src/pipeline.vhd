@@ -67,6 +67,9 @@ architecture rtl of pipeline is
 --wb
 		signal wb_result     : std_logic_vector(DATA_WIDTH-1 downto 0);
 		signal wb_rd      : std_logic_vector(REG_BITS-1 downto 0);
+
+		signal flush : std_logic;
+
 begin  -- rtl
 	
 	fetch_inst: entity work.fetch
@@ -79,7 +82,8 @@ begin  -- rtl
 		pc_in => new_pc_mem,
 
 		pc_out => pc_fetch,
-		instr => instr	
+		instr => instr
+		
 	);
 
 	decode_inst: entity work.decode
@@ -87,7 +91,7 @@ begin  -- rtl
 		clk => clk,
 		reset => reset,
 		stall => mem_in.busy,
-		flush => '0',
+		flush => flush,
 
 		pc_in => pc_fetch,
 		instr => instr,
@@ -196,6 +200,12 @@ begin  -- rtl
 		exec_rt => rt,
 		mem_rd => mem_rd,
 		wb_rd => wb_rd
+	);
+
+	ctrl_inst : entity work.ctrl
+	port map(
+		J => pcsrc,
+		flush => flush
 	);
 
 
