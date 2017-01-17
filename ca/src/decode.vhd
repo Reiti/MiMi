@@ -219,8 +219,6 @@ begin  -- rtl
 			end if;
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			rd := instr_int(25 downto 21);
-			rs := instr_int(20 downto 16);
 		-- Branch Instruction
 		when "000100" =>
 			exec_op_next.aluop <= ALU_SUB;
