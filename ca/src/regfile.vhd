@@ -22,22 +22,30 @@ architecture rtl of regfile is
 	type regfile_type is array(0 to REG_COUNT-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
 
 	signal rdaddr1_int, rdaddr2_int: std_logic_vector(REG_BITS-1 downto 0);
-	signal rddata1_int, rddata2_int: std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
-	signal wraddr_int: std_logic_vector(REG_BITS-1 downto 0) := (others => '0');
+	signal rddata1_int, rddata2_int: std_logic_vector(DATA_WIDTH-1 downto 0);
+	signal wraddr_int: std_logic_vector(REG_BITS-1 downto 0);
 	signal wrdata_int : std_logic_vector(DATA_WIDTH-1 downto 0);
-	signal regfile: regfile_type := (others => (others => '0'));
+	signal regfile: regfile_type;
 	signal regwrite_int : std_logic;
 	-- signal forw : std_logic; -- debug signal
 
 begin  -- rtl
 
-	readwrite: process(rdaddr1_int, rdaddr2_int, wraddr_int, wrdata_int, regwrite_int, regfile) is
+	readwrite: process(reset, rdaddr1_int, rdaddr2_int, wraddr_int, wrdata_int, regwrite_int, regfile) is
 	begin
-		if regwrite_int = '1' and or_reduce(wraddr_int) /= '0' then
-			regfile(to_integer(unsigned(wraddr_int))) <= wrdata_int;
+		if reset = '0' then
+			for I in regfile'range loop
+				regfile(I) <= (others => '0');
+			end loop;
+			rddata1_int <= (others => '0');
+			rddata2_int <= (others => '0');
+		else
+			if regwrite_int = '1' and or_reduce(wraddr_int) /= '0' then
+				regfile(to_integer(unsigned(wraddr_int))) <= wrdata_int;
+			end if;
+			rddata1_int <= regfile(to_integer(unsigned(rdaddr1_int)));
+			rddata2_int <= regfile(to_integer(unsigned(rdaddr2_int)));
 		end if;
-		rddata1_int <= regfile(to_integer(unsigned(rdaddr1_int)));
-		rddata2_int <= regfile(to_integer(unsigned(rdaddr2_int)));
 	end process;
 
 	forwarder:process(stall, regwrite, wraddr, wrdata, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int) is
