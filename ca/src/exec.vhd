@@ -135,6 +135,11 @@ begin  -- rtl
 		end if;
 		if(op_l.regdst ='1') then
 			wrdata_next <= op_l.readdata2;		
+			if forwardB = FWD_ALU then
+		    wrdata_next <= mem_aluresult;
+		  elsif forwardB = FWD_WB then
+		    wrdata_next <= wb_result;
+		  end if;
 		end if;	
 	end process;
 
