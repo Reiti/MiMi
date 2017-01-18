@@ -53,6 +53,19 @@ begin
 	wait until rising_edge(clk);
 	rdaddr1 <= "00000"; rdaddr2<="00000";
 	stall <= '0';
+	regwrite <= '1';
+	wraddr <= "00001";
+	wrdata <= x"DDCADDCA";
+	wait until rising_edge(clk);
+	stall <= '1';
+	wrdata <= (others => '0');
+	wait for 1 ns;
+	stall <= '0';
+
+
+	wait until rising_edge(clk);
+	rdaddr1 <= "00000"; rdaddr2<="00000";
+	stall <= '0';
 	regwrite <= '0';
 	wraddr <= (others => '0');
 	wrdata <= (others => '0');
@@ -66,16 +79,16 @@ begin
 	regwrite <= '1';
 
 	wait until rising_edge(clk);
-	assert(or_reduce(rddata1) = '0') report "0010";
-	assert(or_reduce(rddata2) = '0') report "0020";
+	assert(or_reduce(rddata1) = '0') report "0010" severity Error;
+	assert(or_reduce(rddata2) = '0') report "0020" severity Error;
 
 	--expecting: rd1: AA55AA55 rd2: 0
 	for I in 1 to 3 loop
 		wait until rising_edge(clk);
 
 		wait for CLK_PERIOD/100;
-		assert(or_reduce(rddata2) = '0') report "0110";
-		assert(rddata1 = x"AA55AA55") report "0120";
+		assert(or_reduce(rddata2) = '0') report "0110" severity Error;
+		assert(rddata1 = x"AA55AA55") report "0120" severity Error;
 	end loop;
 
 
@@ -87,8 +100,8 @@ begin
 	wrdata <=x"55AA55AA";
 	regwrite <= '1';
 	wait for CLK_PERIOD/100;
-	assert(or_reduce(rddata2) = '0') report "0210";
-	assert(rddata1 = x"AA55AA55") report "0220";
+	assert(or_reduce(rddata2) = '0') report "0210" severity Error;
+	assert(rddata1 = x"AA55AA55") report "0220" severity Error;
 
 	wait for 2*CLK_PERIOD;
 	wait until rising_edge(clk);
@@ -98,8 +111,8 @@ begin
 	wrdata <=x"12345678";
 	regwrite <= '1';
 	wait for CLK_PERIOD/100;
-	assert(or_reduce(rddata2) = '0') report "0310";
-	assert(rddata1 = x"AA55AA55") report "0320";
+	assert(or_reduce(rddata2) = '0') report "0310" severity Error;
+	assert(rddata1 = x"AA55AA55") report "0320" severity Error;
 	--expecting: rd1: AA55AA55 rd2: 0
 
 	wait for 5*CLK_PERIOD;
@@ -112,8 +125,8 @@ begin
 	regwrite <= '1';
 
 	wait for CLK_PERIOD/100;
-	assert(or_reduce(rddata2) = '0') report "0410";
-	assert(rddata1 = x"AA55AA55") report "0420";
+	assert(or_reduce(rddata2) = '0') report "0410" severity Error;
+	assert(rddata1 = x"AA55AA55") report "0420" severity Error;
 
 	wait until rising_edge(clk);
 	rdaddr1 <= "00000"; rdaddr2<="00000";
@@ -124,8 +137,8 @@ begin
 
 	wait for 3*CLK_PERIOD;
 	wait for CLK_PERIOD/100;
-	assert(or_reduce(rddata1) = '0') report "0480";
-	assert(or_reduce(rddata2) = '0') report "0490";
+	assert(or_reduce(rddata1) = '0') report "0480" severity Error;
+	assert(or_reduce(rddata2) = '0') report "0490" severity Error;
 	wait until rising_edge(clk); -- <-- need this!!!
 	rdaddr1<= "11100"; rdaddr2 <= "00000";
 	regwrite <= '0';
@@ -135,8 +148,8 @@ begin
 	wrdata <= x"89ABCDEF";
 	regwrite <= '1';
 	wait for CLK_PERIOD/100;
-	assert(rddata1 = x"89ABCDEF") report "0510";
-	assert(or_reduce(rddata2) = '0') report "0520";
+	assert(rddata1 = x"89ABCDEF") report "0510" severity Error;
+	assert(or_reduce(rddata2) = '0') report "0520" severity Error;
 
 	--expecting: rd1:89ABCDEF rd2:0
 	--wait for 1*CLK_PERIOD;
@@ -149,26 +162,27 @@ begin
 	wrdata <= x"76543210";
 	regwrite <= '1';
 	wait for CLK_PERIOD/100;
-	assert(rddata2 = x"76543210") report "0610";
+	assert(rddata2 = x"76543210") report "0610" severity Error;
 
 	wait until rising_edge(clk);
 	regwrite <= '1';
 	wraddr <= "00000";
 	wrdata <= x"FFFFFFFF";
 	wait for CLK_PERIOD/100;
-	assert(or_reduce(rddata1) = '0') report "0620";
-	assert(rddata2 = x"76543210") report "0630";
+	assert(or_reduce(rddata1) = '0') report "0620" severity Error;
+	assert(rddata2 = x"76543210") report "0630" severity Error;
 	--expecting: rd1:0 rd2:76543210
 
 	wait until rising_edge(clk);
+	stall <= '0';
 	rdaddr1<= "11101"; rdaddr2 <= "11101";
 	wraddr <= "11101";
 	wrdata <= x"ABCDEF00";
 	regwrite <= '0';
 	-- expecting old data as regwrite = 0
 	wait for CLK_PERIOD/100;
-	assert(or_reduce(rddata1) = '0') report "0620";
-	assert(rddata2 = x"76543210") report "0630";
+	assert(or_reduce(rddata1) = '0') report "0620" severity Error;
+	assert(rddata2 = x"76543210") report "0630" severity Error;
 
 	for I in 1 to 10 loop
 		wait until rising_edge(clk);
@@ -193,17 +207,108 @@ begin
 		-- expecting new data at r30
 		-- playing around with regwrite/stall or writing
 		-- to other registers should not change this
-		assert(rddata1 = x"ABCDEF00") report "0810";
-		assert(rddata2 = x"ABCDEF00") report "0820";
+		assert(rddata1 = x"ABCDEF00") report "0810" severity Error;
+		assert(rddata2 = x"ABCDEF00") report "0820" severity Error;
 	end loop;
 
 	wait until rising_edge(clk);
+	regwrite <= '1';
+	wraddr <= "00001";
+	wrdata <= (others => '0');
+
+	wait until rising_edge(clk);
+	regwrite <= '1';
+	wraddr <= "00010";
+	rdaddr1 <= "00000"; rdaddr2 <= "00000";
+	wrdata <= (others => '0');
+
+	wait until rising_edge(clk);
+	regwrite <= '1';
+	wraddr <= "00001";
+	wrdata <= x"AAAAAAAA";
+	rdaddr1 <= "00001"; rdaddr2 <= "00010";
+	
+	wait until rising_edge(clk);
+	assert(or_reduce(rddata1) = '0') report "0900" severity Error;
+	assert(or_reduce(rddata2) = '0') report "0901" severity Error;
+
+	regwrite <= '1';
+	wraddr <= "00010";
+	wrdata <= x"BBBBBBBB";
+	
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0910" severity Error;
+	assert(rddata2 = x"BBBBBBBB") report "0911" severity Error;
+
+	regwrite <= '0';
+	stall <= '0';
+	
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0920" severity Error;
+	assert(rddata2 = x"BBBBBBBB") report "0921" severity Error;
+
+	regwrite <= '1';
+	stall <= '1';
+	wraddr <= "00010";
+	wrdata <= x"CCCCCCCC";
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0930" severity Error;
+	assert(rddata2 = x"BBBBBBBB") report "0931" severity Error;
+
+	wraddr <= "00010";
+	wrdata <= x"DDDDDDDD";
+	stall <= '0';
+	regwrite <= '1';
+	
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0940" severity Error;
+	assert(rddata2 = x"DDDDDDDD") report "0941" severity Error;
+
+	wraddr <= "00010";
+	wrdata <= x"FFFFFFFF";
+	stall <= '1';
+	regwrite <= '1';
+	
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0950" severity Error;
+	assert(rddata2 = x"DDDDDDDD") report "0951" severity Error;
+
+	stall <= '1';
+	rdaddr1 <= "00000"; rdaddr2 <= "00001";
+	wraddr <= "00001";
+	regwrite <= '1';
+	wrdata <= x"1234ABCD";
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0960" severity Error;
+	assert(rddata2 = x"DDDDDDDD") report "0961" severity Error;
+
+
+	stall <= '0';
+	rdaddr1 <= "00001"; rdaddr2 <= "00000";
+	wraddr <= "00000";
+	wrdata <= x"FFFFFFFF";
+	regwrite <= '1';
+
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0970" severity Error;
+	assert(rddata2 = x"DDDDDDDD") report "0971" severity Error;
+	
 	rdaddr1 <= "00000"; rdaddr2 <= "00000";
 	regwrite <= '0';
 
+	wait until rising_edge(clk);
+	assert(rddata1 = x"AAAAAAAA") report "0980" severity Error;
+	assert(or_reduce(rddata2) = '0') report "0981" severity Error;
+
 	wait until rddata1'event or rddata2'event;
 	wait until rddata1'event or rddata2'event;
-	assert(rdaddr1'last_event <= CLK_PERIOD+CLK_PERIOD/100);
+	assert(rdaddr1'last_event <= CLK_PERIOD+CLK_PERIOD/100) report "1000" severity Error;
 
 
 

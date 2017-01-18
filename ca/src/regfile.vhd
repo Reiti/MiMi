@@ -40,30 +40,31 @@ begin  -- rtl
 		rddata2_int <= regfile(to_integer(unsigned(rdaddr2_int)));
 	end process;
 
-	forwarder:process(regwrite, wraddr, wrdata, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int) is
+	forwarder:process(stall, regwrite, wraddr, wrdata, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int) is
 	variable fwd : boolean;
 	begin
-		-- check if we should forward wrdata
-		fwd := regwrite = '1';
-		if fwd and wraddr = rdaddr1_int then
-			rddata1 <= wrdata;
-		else
-			rddata1 <= rddata1_int;
-		end if;
-		if fwd and wraddr = rdaddr2_int then
-			rddata2 <= wrdata;
-		else
-			rddata2 <= rddata2_int;
-		end if;
+		if stall = '0' then
+			-- check if we should forward wrdata
+			fwd := regwrite = '1';
+			if fwd and wraddr = rdaddr1_int then
+				rddata1 <= wrdata;
+			else
+				rddata1 <= rddata1_int;
+			end if;
+			if fwd and wraddr = rdaddr2_int then
+				rddata2 <= wrdata;
+			else
+				rddata2 <= rddata2_int;
+			end if;
 
-		-- zero outputs if $0 was read
-		if or_reduce(rdaddr1_int) = '0' then
-			rddata1 <= (others => '0');
+			-- zero outputs if $0 was read
+			if or_reduce(rdaddr1_int) = '0' then
+				rddata1 <= (others => '0');
+			end if;
+			if or_reduce(rdaddr2_int) = '0' then
+				rddata2 <= (others => '0');
+			end if;
 		end if;
-		if or_reduce(rdaddr2_int) = '0' then
-			rddata2 <= (others => '0');
-		end if;
-
 	end process;
 
 	latch: process(clk, reset, stall, rdaddr1, rdaddr2, wraddr, wrdata, regwrite) is
