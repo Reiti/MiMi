@@ -40,7 +40,7 @@ architecture behavior of serial_port_wrapper is
 	
 begin  -- behavior
 
-	sp : entity work.serial_port
+	sp : serial_port
 		generic map (
 			clk_freq	  => clk_freq,
 			baud_rate	  => baud_rate,
