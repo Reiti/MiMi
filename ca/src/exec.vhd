@@ -39,9 +39,6 @@ architecture rtl of exec is
 	signal aluresult_next : std_logic_vector(DATA_WIDTH-1 downto 0) := (others =>'0');
 	signal wrdata_next : std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal zero_next, neg_next : std_logic;
-	signal memop_out_next : mem_op_type := MEM_NOP;
-	signal jmpop_out_next : jmp_op_type := JMP_NOP;
-	signal wbop_out_next  :  wb_op_type := WB_NOP;
 	signal exc_ovf_next   : std_logic;
 
 	signal new_pc_next : std_logic_vector(PC_WIDTH-1 downto 0);
@@ -80,12 +77,6 @@ begin  -- rtl
 		wrdata_next <= alu_out; -- wrdata ignored, when not needed
 		zero_next <= alu_Z;
 		neg_next <= alu_out(DATA_WIDTH-1);--alu_V;
-		
-		memop_out_next <= memop_int;
-		jmpop_out_next <= jmpop_int;
-		wbop_out_next <= wbop_int;
-
-
 
 		exc_ovf_next <= alu_V;	
 
@@ -161,11 +152,7 @@ begin  -- rtl
 
 	sync:process(clk, reset, stall, flush, op, pc_in, memop_in, jmpop_in, wbop_in)
 	begin
-		if reset = '0' then
-			--memop_out_next <= MEM_NOP;
-			--jmpop_out_next <= JMP_NOP;
-			--wbop_out_next <= WB_NOP;
-		elsif flush = '1' then
+		if reset = '0' or flush = '1' then
 			null;	
 		elsif (rising_edge(clk) and not stall = '1') then
 			--latch new values
@@ -174,8 +161,6 @@ begin  -- rtl
 			memop_int <= memop_in;
 			jmpop_int <= jmpop_in;
 			wbop_int <= wbop_in;
-
-	 	
 		end if;
 	end process;
 end rtl;

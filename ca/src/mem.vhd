@@ -41,7 +41,6 @@ architecture rtl of mem is
 	signal wbop_in_int: wb_op_type := WB_NOP;
 	signal mem_op_int: mem_op_type := MEM_NOP;
 	signal wrdata_int: std_logic_vector(DATA_WIDTH-1 downto 0);
-	signal mem_data_int: std_logic_vector(DATA_WIDTH-1 downto 0);
 	signal jmp_op_int: jmp_op_type;
 	signal neg_int, zero_int: std_logic;
 
@@ -97,28 +96,18 @@ begin  -- rtl
 	begin
 		if reset = '0' or flush = '1' then
 			pc_in_int <= (others => '0');
-			--new_pc_in_int <= (others => '0');
 			rd_in_int <= (others => '0');
 			aluresult_in_int <= (others => '0');
 			wbop_in_int <= WB_NOP; 
 			mem_op_int <= MEM_NOP;
 			wrdata_int <= (others => '0');
-			mem_data_int <= (others => '0');
-			--neg_int <= '0';
-			--zero_int <= '0';
-			--jmp_op_int <= JMP_NOP;
 		elsif rising_edge(clk) and (not(stall = '1')) then
 			pc_in_int <= pc_in;
-			--new_pc_in_int <= new_pc_in;
 			rd_in_int <= rd_in;
 			aluresult_in_int <= aluresult_in;
 			wbop_in_int <= wbop_in;
 		  	mem_op_int <= mem_op;
 			wrdata_int <= wrdata;
-			--mem_data_int <= mem_data;
-			--neg_int <= neg;
-			--zero_int <= zero;
-			--jmp_op_int <= jmp_op;
 		end if;
 		if rising_edge(clk) and stall = '1' then
 			mem_op_int.memread <= '0';
