@@ -1,4 +1,4 @@
-PROJECT=asmtest
+PROJECT=helloworld
 
 PREFIX=/usr/mips
 
@@ -36,6 +36,6 @@ libc.a: util.o
 	./hex2mif.pl < $< > $@
 
 clean:
-	rm -rf *.o *.elf *.hex *.mif *~
+	rm -rf asmtest.o helloworld.o md5.o *.elf *.hex *.mif *~
 
 .PHONY: all lib conf clean
