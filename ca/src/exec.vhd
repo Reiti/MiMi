@@ -127,10 +127,10 @@ begin  -- rtl
 		if(op_l.regdst ='1') then
 			wrdata_next <= op_l.readdata2;		
 			if forwardB = FWD_ALU then
-		    wrdata_next <= mem_aluresult;
-		  elsif forwardB = FWD_WB then
-		    wrdata_next <= wb_result;
-		  end if;
+			    wrdata_next <= mem_aluresult;
+			elsif forwardB = FWD_WB then
+			    wrdata_next <= wb_result;
+			end if;
 		end if;	
 	end process;
 
@@ -153,7 +153,9 @@ begin  -- rtl
 	sync:process(clk, reset, stall, flush, op, pc_in, memop_in, jmpop_in, wbop_in)
 	begin
 		if reset = '0' or flush = '1' then
-			null;	
+			op_l <= EXEC_NOP;
+			memop_int <= MEM_NOP;
+			wbop_int <= WB_NOP;
 		elsif (rising_edge(clk) and not stall = '1') then
 			--latch new values
 			op_l<=op;
