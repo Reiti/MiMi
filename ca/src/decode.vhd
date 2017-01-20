@@ -144,15 +144,14 @@ begin  -- rtl
 					exec_op_next.aluop <= ALU_SRA;
 				when "001000" => --JR
 					exec_op_next.aluop <= ALU_ADD;
-					exec_op_next.rd <= "11111";
-					exec_op_next.rt <= (others => '0');
+					rd := (others => '0');
+					rt := (others => '0');
 					jmp_op_next <= JMP_JMP;
 					wb_op_next.regwrite <= '0';
 					-- pc = rs
 				when "001001" =>--JALR
 					exec_op_next.aluop <= ALU_ADD;
-					--exec_op_next.rd <= "11111"; not r31, chris >:D
-					exec_op_next.rt <= (others => '0');
+					rt := (others => '0');
 					exec_op_next.link <= '1';
 					jmp_op_next <= JMP_JMP;
 					wb_op_next.regwrite <= '1';
@@ -225,25 +224,29 @@ begin  -- rtl
 			exec_op_next.branch <= '1';
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BEQ;
-			rd := instr_int(25 downto 21);
+			rd := (others => '0');
+			rt := instr_int(25 downto 21);
 			rs := instr_int(20 downto 16);
 		when "000101" =>
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BNE;
-			rd := instr_int(25 downto 21);
+			rd := (others => '0');
+			rt := instr_int(25 downto 21);
 			rs := instr_int(20 downto 16);
 		when "000110" =>
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			exec_op_next.rt <= (others => '0');
+			rt := (others => '0');
+			rd := (others => '0');
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BLEZ;
 		when "000111" =>
 			exec_op_next.aluop <= ALU_SUB;
 			exec_op_next.branch <= '1';
-			exec_op_next.rt <= (others => '0');
+			rt := (others => '0');
+			rd := (others => '0');
 			exec_op_next.imm <= sign_ext(instr_int, 16, 32);
 			jmp_op_next <= JMP_BGTZ;
 		-- Extra ALU Instructions

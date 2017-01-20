@@ -76,9 +76,6 @@ begin  -- rtl
 			rddata1_next <= (others => '0');
 			rddata2_next <= (others => '0');
 			regwrite_int <= '0';
---			for I in regfile'range loop
---				regfile(I) <= (others => '0');
---			end loop;
 			--assert(forw = '0');
 		elsif stall /= '1' and rising_edge(clk) then
 			rdaddr1_int <= rdaddr1;
