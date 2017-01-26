@@ -33,8 +33,8 @@ begin  -- rtl
 
 	forwarder:process(stall, regwrite, regwrite_int, rdaddr1, rdaddr2, rdaddr1_int, rdaddr2_int, rddata1_int, rddata2_int, wraddr, wrdata) is
 	begin
-		rddata1 <= rddata1_int;
-		rddata2 <= rddata2_int;
+		rddata1 <= std_logic_vector(TO_01(signed(rddata1_int)));
+		rddata2 <= std_logic_vector(TO_01(signed(rddata2_int)));
 
 		if regwrite = '1' and stall = '0' then
 			if rdaddr1_int = wraddr then
